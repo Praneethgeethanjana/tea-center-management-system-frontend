@@ -6,11 +6,13 @@ import Loader from "@components/spinner/Loader";
 import { createFarmer, updateFarmer } from "@src/services/farmers";
 import Flatpickr from "react-flatpickr";
 import moment from "moment";
-const CreateVariant = ({ detials, closeModal, updateHandler }) => {
-  const [data, setData] = useState(detials ?? {weight:null,cover_weight:null,net_weight:null});
+import {addStock, updateStock} from "@src/services/stock";
+import {updateAdvance} from "@src/services/advance";
+const CreateVariant = ({ details, closeModal, updateHandler }) => {
+  const [data, setData] = useState(details ?? {});
   const [loading, setLoading] = useState(false);
   const [apiLoader, setApiLoader] = useState(false);
-  const [location, setLocation] = React.useState(null);
+  const [stockType, setStockType] = React.useState("TEA");
   const [selectedDate, setSelectedDate] = useState([
     moment(new Date()).format("YYYY-MM-DD"),
   ]);
@@ -18,48 +20,48 @@ const CreateVariant = ({ detials, closeModal, updateHandler }) => {
 
 
   useEffect( () => {
-    // setLoading(true);
+    setLoading(true);
+    if(details) {
+      let obj = {
+        variantName : details.variant,
+        size : details.availableSize,
+        price : details.oneKgPrice
+      }
+      setData(obj)
+      setStockType(details.stockType)
+    }
+
+    setLoading(false)
 
   },[])
 
 
 
   const manageHandler = async () => {
-    if (!data.firstName || data.firstName.trim() === "" )
-      return notifyMessage("First name can not be empty", 0);
-    if (!data.lastName || data.lastName.trim() === "" )
-      return notifyMessage("Last name can not be empty", 0);
-    return notifyMessage("Please enter valid mobile number", 0);
-    if (!data.nic || data.nic.trim() === "" )
-      return notifyMessage("NIC can not be empty", 0);
-    if (!data.address || data.address.trim() === "" )
-      return notifyMessage("Address can not be empty", 0);
+    if (!data.variantName || data.variantName.trim() === "" )
+      return notifyMessage("Variant name can not be empty", 0);
+    if (!data.size || data.size === "" )
+      return notifyMessage("Size can not be empty", 0);
+    if (!data.price || data.price === "" )
+      return notifyMessage("Price can not be empty", 0);
 
     const obj = {
-      firstName : data.firstName,
-      lastName : data.lastName,
-      address : data.address,
-      latitude : `${location?.lat}`,
-      longitude : `${location?.lng}`,
-      nic : data.nic,
-      bankAccountNumber : data.accountNumber ?? null,
-      bankAccountName : data.accountName ?? null,
-      bankName : data.bankName ?? null,
-      bankBranch: data.branchName ?? null
+      stockType : stockType,
+      variant : data.variantName,
+      size : data.size,
+      oneKgPrice : parseFloat(data.price)
     }
-
-    if(detials) {
-      await updateFarmerHandler(detials.id,obj);
+    if(details) {
+      await updateStockHandler(details.id,obj);
     } else {
-      await createFarmerHandler(obj);
+      await createStock(obj);
     }
-
   };
 
 
-  const createFarmerHandler = async (obj) => {
+  const createStock = async (obj) => {
     setApiLoader(true);
-    await  createFarmer(obj).then((res) => {
+    await  addStock(obj).then((res) => {
       if(res.success) {
         notifyMessage(res.message,1)
         if(updateHandler) updateHandler();
@@ -70,9 +72,9 @@ const CreateVariant = ({ detials, closeModal, updateHandler }) => {
     }).finally(()=> { setApiLoader(false)});
   }
 
-  const updateFarmerHandler = async (id,obj) => {
+  const updateStockHandler = async (id,obj) => {
     setApiLoader(true);
-    await updateFarmer(id,obj).then((res) => {
+    await updateStock(id,obj).then((res) => {
       if(res.success) {
         notifyMessage(res.message,1)
         if(updateHandler) updateHandler();
@@ -107,9 +109,9 @@ const CreateVariant = ({ detials, closeModal, updateHandler }) => {
                   selection
                   search={false}
                   onChange={(e, { value }) => {
-                    // getMyAppointments(null,null,value)
+                   setStockType(value)
                   }}
-                  value={"TEA"}
+                  value={stockType}
                   options={[
                     { key: "TEA", text: "Tea", value: "TEA" },
                     { key: "FERTILIZER", text: "Fertilizer", value: "FERTILIZER" },
@@ -142,7 +144,9 @@ const CreateVariant = ({ detials, closeModal, updateHandler }) => {
                   value={data.size ?? ""}
                   onChange={(e) => {
                     let val = e.target.value;
-                    inputHandler(e,val)
+                    if(/^\d*$/.test(val) || val === '') {
+                      inputHandler(e,val)
+                    }
                   }}
                   type="text"
                   placeholder="Size"
@@ -151,34 +155,15 @@ const CreateVariant = ({ detials, closeModal, updateHandler }) => {
               </div>
             </Col>
 
-
             <Col md={6}>
               <div className={"text-wrapper tile-wrapper"}>
-                <Label className={"font-small-4"}>Available QTY</Label>
-                <Input
-                  name="qty"
-                  value={data.qty ?? ""}
-                  onChange={(e) => {
-                    let val = e.target.value;
-                      inputHandler(e,val);
-                  }}
-                  type="text"
-                  placeholder="QTY"
-                  className={"mb-1"}
-                />
-              </div>
-            </Col>
-
-            <Col md={6}>
-              <div className={"text-wrapper tile-wrapper"}>
-                <Label className={"font-small-4"}>Price</Label>
+                <Label className={"required font-small-4"}>Price</Label>
                 <Input
                   name="price"
                   value={data.price ?? ""}
                   onChange={(e) => {
                     let val = e.target.value;
-                    if(/^\d*\.?\d{0,2}$/.test(val) || val === '') {
-                      if(val == ".") val = "0."
+                    if(/^\d*$/.test(val) || val === '') {
                       inputHandler(e,val)
                     }
                   }}
@@ -199,7 +184,7 @@ const CreateVariant = ({ detials, closeModal, updateHandler }) => {
               className="btn btn-primary mt-3"
               onClick={manageHandler}
             >
-              Add
+              {details ? "Update" : "Add"}
             </button>
           </div>
         </div>

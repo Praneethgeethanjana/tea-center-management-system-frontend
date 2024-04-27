@@ -9,7 +9,7 @@ import moment from "moment";
 import { getVariables } from "@src/services/statistics";
 import { addTeaLeaves } from "@src/services/tea-leaves";
 const AddLeaves = ({ detials, closeModal, updateHandler }) => {
-  const [data, setData] = useState(detials ?? {weight:null,cover_weight:1,net_weight:null});
+  const [data, setData] = useState(detials ?? {weight:null,cover_weight:null,net_weight:null});
   const [loading, setLoading] = useState(false);
   const [apiLoader, setApiLoader] = useState(false);
   const [location, setLocation] = React.useState(null);
@@ -59,10 +59,12 @@ const AddLeaves = ({ detials, closeModal, updateHandler }) => {
     if(selectedFarmer === '') return notifyMessage("Please select a farmer",0)
     if (!data.weight || data.weight.trim() === "" )
       return notifyMessage("Weight can not be empty", 0);
+    if (!data.cover_weight || data.cover_weight.trim() === "" )
+      return notifyMessage("Bag weight can not be empty", 0);
 
     const obj = {
       numberOfKg : data.weight,
-      bagWeight : 1,
+      bagWeight : data.cover_weight,
       todayTeaPrice : parseFloat(todayTeaPrice),
       date : selectedDate[0],
       userId : selectedFarmer
@@ -107,17 +109,34 @@ const AddLeaves = ({ detials, closeModal, updateHandler }) => {
       if(val === "") {
         setData({...data,['net_weight'] : '',['total_amount']:'',[name]: val})
       } else {
-        let netVal = ((parseFloat(val)) - 1);
-        let tot = null
-        if(todayTeaPrice) tot = (netVal * todayTeaPrice)
-        setData({...data,['net_weight'] : netVal,['total_amount']:tot,[name]: val})
+        if(data.cover_weight) {
+          if(data.cover_weight >= (val)) return notifyMessage("Please enter correct weight",0)
+          let netVal = ((parseFloat(val)) - parseFloat(data.cover_weight));
+          let tot = null
+          if(todayTeaPrice) tot = (netVal * todayTeaPrice)
+          setData({...data,['net_weight'] : netVal,['total_amount']:tot,[name]: val})
+        } else {
+          setData({...data,[name]: val})
+        }
       }
   };
 
   const coverWeightInputHandler = (e,val) => {
     let name = e.target.name;
-    setData({ ...data, [name]: val });
-  };
+    if (val === "") {
+      setData({...data, ['net_weight']: '', ['total_amount']: '', [name]: val})
+    } else {
+      if (data.weight) {
+        if(val > (data.weight - 1)) return notifyMessage("Please enter correct bag weight",0)
+        let netVal = ((parseFloat(data.weight)) - parseFloat(val));
+        let tot = null
+        if (todayTeaPrice) tot = (netVal * todayTeaPrice)
+        setData({...data, ['net_weight']: netVal, ['total_amount']: tot, [name]: val})
+      } else {
+        setData({...data,[name]: val})
+      }
+    }
+  }
 
 
   return (
@@ -187,12 +206,11 @@ const AddLeaves = ({ detials, closeModal, updateHandler }) => {
             </Col>
             <Col md={6}>
               <div className={"text-wrapper tile-wrapper mt-1"}>
-                <Label className={"required font-small-4"}>Cover Weight (Kg)</Label>
+                <Label className={"required font-small-4"}>Bag Weight (Kg)</Label>
                 <Input
                   name="cover_weight"
                   value={data.cover_weight}
                   // disabled={data.weight === null || data.weight === ""}
-                  disabled
                   onChange={(e) => {
                     let val = e.target.value;
                     if(/^\d*$/.test(val) || val === '') {

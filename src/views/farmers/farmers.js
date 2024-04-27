@@ -162,10 +162,21 @@ const Farmers = () => {
                 responsive
                 columns={[
                   {
+                    name: "ID",
+                    selector: (row) => row["id"],
+                    sortable: false,
+                    width: "80px",
+                    cell: (row) => (
+                        <p className="text-bold-500 text-truncate mb-0">
+                          {row.id}
+                        </p>
+                    ),
+                  },
+                  {
                     name: "First Name",
                     selector: (row) => row["firstName"],
                     sortable: false,
-                    minWidth: "80px",
+                    width: "140px",
                     cell: (row) => (
                       <p className="text-bold-500 text-truncate mb-0">
                         {row.firstName}
@@ -176,7 +187,7 @@ const Farmers = () => {
                     name: "Last Name",
                     selector: (row) => row["lastName"],
                     sortable: false,
-                    minWidth: "80px",
+                    width: "140px",
                     cell: (row) => (
                       <p className="text-bold-500 text-truncate mb-0">
                         {row?.lastName}
@@ -184,10 +195,21 @@ const Farmers = () => {
                     ),
                   },
                   {
+                    name: "NIC",
+                    selector: (row) => row["nic"],
+                    sortable: false,
+                    width: "140px",
+                    cell: (row) => (
+                        <p className="text-bold-500 text-truncate mb-0">
+                          {row?.nic}
+                        </p>
+                    ),
+                  },
+                  {
                     name: "Mobile",
                     selector: (row) => row["mobile"],
                     sortable: false,
-                    minWidth: "130px",
+                    width: "140px",
                     cell: (row) => (
                       <p className="text-bold-500 text-truncate mb-0">
                         {row.mobile ?? "N/A"}
@@ -198,7 +220,7 @@ const Farmers = () => {
                     name: "Address",
                     selector: (row) => row["address"],
                     sortable: false,
-                    minWidth: "130px",
+                    minWidth: "140px",
                     cell: (row) => (
                       <p className="text-bold-500 text-truncate mb-0">
                         {row.address ??  "N/A"}

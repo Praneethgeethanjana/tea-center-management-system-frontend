@@ -19,9 +19,13 @@ import Loader from "@components/spinner/Loader";
 import moment from "moment/moment";
 import { Checkbox, Dropdown, Form } from "semantic-ui-react";
 import Flatpickr from "react-flatpickr";
-import { Box, Eye, File, Plus } from "react-feather";
+import {Box, Edit, Eye, File, Plus, Trash2} from "react-feather";
 import { useNavigate } from "react-router-dom";
 import CreateVariant from "@src/views/stock/modal/create-variant";
+import {deleteStock, getAllStockDetails} from "@src/services/stock";
+import Pagination from "@components/pagination";
+import swal from "sweetalert";
+import {deleteAdvance} from "@src/services/advance";
 
 
 const Stock = () => {
@@ -29,30 +33,59 @@ const Stock = () => {
   const [loader, setLoader] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [appointments, setAppointments] = useState([]);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [stocks, setStocks] = useState([]);
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const [status, setStatus] = useState("ALL");
   const [keyword, setKeyword] = useState("");
-  const [selectedDates, setSelectedDates] = useState([
-    moment(new Date()).subtract(1, "month").format("YYYY/MM/DD"),
-    moment(new Date()).format("YYYY/MM/DD")
-  ]);
-  const [liveDate, setLiveDate] = useState(null);
+  const [totalPages, setTotalPages] = useState("");
+  const [pageIndex, setPageIndex] = useState(0);
 
   useEffect(() => {
-    // setLoader(true);
-    // getMyAppointments();
+    setLoader(true);
+    getStockDetails();
   }, [keyword]);
 
 
-  const getMyAppointments = async (startDate,endDate, sts) => {
-    setLoader(true)
-
+  const getStockDetails = async (search,page,type) => {
+    setLoader(true);
+    getAllStockDetails(search ?? keyword,page || page === 0 ? page : pageIndex,type ?? status).then((res) => {
+      if(res.success){
+        if(res.body.content) {
+          setStocks(res.body.content);
+          setTotalPages(res.body.totalPages);
+          setPageIndex(res.body.number);
+        }
+      }
+    }).finally(() => {setLoader(false)});
   }
 
-  const statusChangeHandler = (id,action) => {
-    errorSweetAlert("Are you sure?","",action === "ACTIVE" ? "Accept" : action === "COMPLETED" ? "Yes, Complete" : "Yes,Reject",()=> {
+  const deleteConformer = (id) => {
+    swal({
+      title: "Are you sure you want to do this?",
+      closeOnClickOutside: false,
+      buttons: {
+        cancel: "No",
+        dangerMode: { text: "Yes", value: "action", className: "okay-btn" },
+      },
+    }).then(async (value) => {
+      switch (value) {
+        case "action":
+          deleteStockHandler(id);
+          break;
+        default:
+      }
+    });
+  };
 
-    },true)
+  const deleteStockHandler = async (id) => {
+    await deleteStock(id).then((res) => {
+      if(res.success) {
+        notifyMessage(res.message,1);
+        getStockDetails();
+      } else {
+        notifyMessage(res.message,0);
+      }
+    })
   }
 
   return (
@@ -96,7 +129,7 @@ const Stock = () => {
                     search={false}
                     onChange={(e, { value }) => {
                       setStatus(value);
-                      // getMyAppointments(null,null,value)
+                      getStockDetails(keyword,pageIndex,value)
                     }}
                     value={status}
                     options={[
@@ -120,155 +153,78 @@ const Stock = () => {
             <div>
               <DataTable
                 className="dataTable-custom light-table"
-                data={appointments}
+                data={stocks}
                 pointerOnHover
                 highlightOnHover
                 responsive
                 columns={[
                   {
-                    name: "APPOINTMENT ID",
-                    selector: (row) => row["id"],
+                    name: "Variant Name",
+                    selector: (row) => row["variant"],
                     sortable: false,
                     minWidth: "150px",
                     cell: (row) => (
                       <p className="text-bold-500 text-truncate mb-0">
-                        {row.id}
+                        {row.variant ?? "N/A"}
                       </p>
                     ),
                   },
                   {
-                    name: "USER ID",
-                    selector: (row) => row["userUniqueId"],
+                    name: "Stock Type",
+                    selector: (row) => row["stockType"],
                     sortable: false,
                     minWidth: "100px",
                     cell: (row) => (
                       <p className="text-bold-500 text-truncate mb-0">
-                        {row?.user?.userUniqueId}
+                        {row.stockType ?? "N/A"}
                       </p>
                     ),
                   },
                   {
-                    name: "NAME",
-                    selector: (row) => row["user"],
+                    name: "Qty",
+                    selector: (row) => row["size"],
                     sortable: false,
                     minWidth: "200px",
                     cell: (row) => (
                       <p className="text-bold-500 text-truncate mb-0">
-                        {row.user?.firstName + ' ' + row.user?.lastName}
+                        {row.size} Kg
                       </p>
                     ),
                   },
                   {
-                    name: "CREATED DATE",
-                    selector: (row) => row["created"],
+                    name: "Price of 1 Kg",
+                    selector: (row) => row["oneKgPrice"],
                     sortable: false,
                     minWidth: "130px",
                     cell: (row) => (
                       <p className="text-bold-500 text-truncate mb-0">
-                        {row.created ? row.created.split('T')[0] : "N/A"}
+                        Rs {row.oneKgPrice}
                       </p>
                     ),
                   },
                   {
-                    name: "APPOINT DATE",
-                    selector: (row) => row["appointmentDate"],
-                    sortable: false,
-                    minWidth: "130px",
-                    cell: (row) => (
-                      <p className="text-bold-500 text-truncate mb-0">
-                        {row.appointmentDate ? row.appointmentDate.split('T')[0] : "N/A"}
-                      </p>
-                    ),
-                  },
-                  {
-                    name: "PAYMENT SLIP",
+                    name: "ACTIONS",
+                    minWidth: "200px",
                     selector: (row) => row[""],
                     sortable: false,
-                    minWidth: "150px",
                     cell: (row) => (
-                      <div className={"mid-center"}>
-                        <div
-                          onClick={() => {
-                            window.open(row.paymentSlipUrl)
-                          }}
-                        >
-                          <File size={25} color={"#05930d"} />
-                        </div>
-                      </div>
-                    ),
-                  },
-                  {
-                    name: "DOCTOR RECEIPT",
-                    selector: (row) => row[""],
-                    sortable: false,
-                    minWidth: "150px",
-                    cell: (row) => (
-                      <div className={"mid-center"}>
-                        {row.doctorReceiptUrl ?
-                          <div
-                            onClick={() => {
-                              window.open(row.doctorReceiptUrl)
-                            }}
+                        <div className={"mid-center"}>
+                          <button
+                              className={"tbl-status-btn"}
+                              onClick={() => {
+                                setSelectedVariant(row);
+                                setIsOpen(true);
+                              }}
                           >
-                            <File size={25} color={"#05930d"} />
-                          </div> : 'N/A'}
-                      </div>
-                    ),
-                  },
-                  {
-                    name: "TOTAL FEE",
-                    selector: (row) => row["total"],
-                    sortable: false,
-                    minWidth: "130px",
-                    cell: (row) => (
-                      <p className="text-bold-500 text-truncate mb-0">
-                        {row.total ?  `Rs ${row.total}` : "N/A"}
-                      </p>
-                    ),
-                  },
-                  {
-                    name: "STATUS",
-                    selector: (row) => row["status"],
-                    minWidth: "150px",
-                    sortable: false,
-                    cell: (row) => (
-                      <p className="text-bold-500 text-truncate mb-0">
-                        {row.status === 'ACTIVE' ? "ACCEPTED" : row.status}
-                      </p>
-                    ),
-                  },
-                  {
-                    name: "NOTE",
-                    selector: (row) => row["remark"],
-                    sortable: false,
-                    minWidth: "200px",
-                    cell: (row) => (
-                      <p className="text-bold-500 mb-0">
-                        {row.remark ?? "N/A"}
-                      </p>
-                    ),
-                  },
-                  {
-                    name: "OPTIONS",
-                    selector: (row) => row[""],
-                    sortable: false,
-                    minWidth: "300px",
-                    cell: (row) => (
-                      <div>
-                        {row.status === "PENDING" ?   <div className={"d-flex"}>
-                          <button style={{marginRight:'5px'}} className="btn  btn-success" onClick={()=> {statusChangeHandler(row.id,'ACTIVE')}}>Accept</button>
-                          <button className="btn btn-danger" onClick={()=> {statusChangeHandler(row.id,'REJECTED')}}>Reject</button>
-                        </div> : row.status === "ACTIVE" ? <button
-                          onClick={()=> {
-                            setIsOpen(true);
-                            setSelectedAppointment(row);
-                            console.log("SELECTED",row)
-                          }} className="btn btn-warning">Upload Report</button> : row.status === "COMPLETED" ? <button   onClick={()=> {
-                          setIsOpen(true);
-                          setSelectedAppointment(row);
-                          console.log("SELECTED",row)
-                        }} className="btn btn-primary">View Report</button> : 'N/A'}
-                      </div>
+                            <Edit size="15" />
+                          </button>
+                          <button
+                              className={"tbl-status-btn"}
+                              onClick={() => deleteConformer(row.id)}
+                          >
+                            <Trash2 size="15" />
+                          </button>
+                        </div>
                     ),
                   },
                 ]}
@@ -277,6 +233,20 @@ const Stock = () => {
             </div>
           </Col>
         )}
+
+        {!loader && totalPages > 0 && (
+            <div className="w-100 d-flex justify-content-end mt-1 px-3">
+              <Pagination
+                  activePage={pageIndex + 1}
+                  totalNoOfPages={totalPages}
+                  handlePagination={async (page) => {
+                    await setPageIndex(page - 1);
+                    await getStockDetails(null,page - 1,null);
+                  }}
+              />
+            </div>
+        )}
+
       </Row>
 
       <Modal
@@ -289,11 +259,14 @@ const Stock = () => {
           }}
           className={"selector-wrapper font-medium-2 inline-flex"}
         >
-          {`Create Variant`}
+          {`${selectedVariant ? "Update" : "Create"} Variant`}
         </ModalHeader>
         <ModalBody className="modal-dialog-centered">
 
-          <CreateVariant/>
+          <CreateVariant updateHandler={getStockDetails} details={selectedVariant} closeModal={() => {
+            setIsOpen(false)
+            setSelectedVariant(null)
+          }}/>
 
         </ModalBody>
         <ModalFooter></ModalFooter>
