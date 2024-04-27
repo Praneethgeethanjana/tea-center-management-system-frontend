@@ -19,17 +19,21 @@ import Loader from "@components/spinner/Loader";
 import moment from "moment/moment";
 import { Checkbox, Dropdown, Form } from "semantic-ui-react";
 import Flatpickr from "react-flatpickr";
-import { Box, Eye, File, Plus } from "react-feather";
+import {Box, Edit, Eye, File, Plus, Trash2} from "react-feather";
 import { useNavigate } from "react-router-dom";
 import CreateAdvance from "@src/views/advance/modal/create-advance";
+import {deleteTeaLeaves, getAllTeaLeavesRecords} from "@src/services/tea-leaves";
+import {deleteAdvance, getAllAdvanceDetails} from "@src/services/advance";
+import swal from "sweetalert";
+import Pagination from "@components/pagination";
 
 
 const Advance = () => {
   const navigate = useNavigate();
   const [loader, setLoader] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [appointments, setAppointments] = useState([]);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [advances, setAdvances] = useState([]);
+  const [selectedAdvance, setSelectedAdvance] = useState(null);
   const [status, setStatus] = useState("ALL");
   const [keyword, setKeyword] = useState("");
   const [selectedDates, setSelectedDates] = useState([
@@ -37,23 +41,58 @@ const Advance = () => {
     moment(new Date()).format("YYYY/MM/DD")
   ]);
   const [liveDate, setLiveDate] = useState(null);
+  const [totalPages, setTotalPages] = useState("");
+  const [pageIndex, setPageIndex] = useState(0);
 
   useEffect(() => {
-    // setLoader(true);
-    // getMyAppointments();
+     setLoader(true);
+      getAllAdvances();
   }, [keyword]);
 
 
-  const getMyAppointments = async (startDate,endDate, sts) => {
+  const getAllAdvances = async (search,page,startDate,endDate) => {
     setLoader(true)
-
-
+    await getAllAdvanceDetails(search ?? keyword,page || page === 0 ? page : pageIndex,startDate ?? selectedDates[0],endDate ?? selectedDates[1]).then((res) => {
+      if(res.success){
+        if(res.body && res.body?.content){
+          setAdvances(res.body.content);
+          setTotalPages(res.body.totalPages);
+          setPageIndex(res.body.number);
+        }
+      } else {
+        notifyMessage(res.message,0)
+        setAdvances([]);
+      }
+    }).finally(()=> {setLoader(false)});
   }
 
-  const statusChangeHandler = (id,action) => {
-    errorSweetAlert("Are you sure?","",action === "ACTIVE" ? "Accept" : action === "COMPLETED" ? "Yes, Complete" : "Yes,Reject",()=> {
+  const deleteConformer = (id) => {
+    swal({
+      title: "Are you sure you want to do this?",
+      closeOnClickOutside: false,
+      buttons: {
+        cancel: "No",
+        dangerMode: { text: "Yes", value: "action", className: "okay-btn" },
+      },
+    }).then(async (value) => {
+      switch (value) {
+        case "action":
+          deleteAdvanceHandler(id);
+          break;
+        default:
+      }
+    });
+  };
 
-    },true)
+  const deleteAdvanceHandler = async (id) => {
+    await deleteAdvance(id).then((res) => {
+      if(res.success) {
+        notifyMessage(res.message,1);
+        getAllAdvances();
+      } else {
+        notifyMessage(res.message,0);
+      }
+    })
   }
 
 
@@ -130,7 +169,7 @@ const Advance = () => {
                         moment(date[0]).format("YYYY/MM/DD"),
                         moment(date[1]).format("YYYY/MM/DD"),
                       ]);
-                      // getMyAppointments( moment(date[0]).format("YYYY/MM/DD"),moment(date[1]).format("YYYY/MM/DD"),null)
+                      getAllAdvances(null,null,moment(date[0]).format("YYYY/MM/DD"),moment(date[1]).format("YYYY/MM/DD"))
                     }}
                   />
                 </div>
@@ -146,13 +185,13 @@ const Advance = () => {
             <div>
               <DataTable
                 className="dataTable-custom light-table"
-                data={appointments}
+                data={advances}
                 pointerOnHover
                 highlightOnHover
                 responsive
                 columns={[
                   {
-                    name: "APPOINTMENT ID",
+                    name: "ID",
                     selector: (row) => row["id"],
                     sortable: false,
                     minWidth: "150px",
@@ -163,18 +202,7 @@ const Advance = () => {
                     ),
                   },
                   {
-                    name: "USER ID",
-                    selector: (row) => row["userUniqueId"],
-                    sortable: false,
-                    minWidth: "100px",
-                    cell: (row) => (
-                      <p className="text-bold-500 text-truncate mb-0">
-                        {row?.user?.userUniqueId}
-                      </p>
-                    ),
-                  },
-                  {
-                    name: "NAME",
+                    name: "FARMER",
                     selector: (row) => row["user"],
                     sortable: false,
                     minWidth: "200px",
@@ -185,7 +213,18 @@ const Advance = () => {
                     ),
                   },
                   {
-                    name: "CREATED DATE",
+                    name: "AMOUNT",
+                    selector: (row) => row["amount"],
+                    sortable: false,
+                    minWidth: "200px",
+                    cell: (row) => (
+                        <p className="text-bold-500 text-truncate mb-0">
+                          {row.amount}
+                        </p>
+                    ),
+                  },
+                  {
+                    name: "DATE",
                     selector: (row) => row["created"],
                     sortable: false,
                     minWidth: "130px",
@@ -196,105 +235,28 @@ const Advance = () => {
                     ),
                   },
                   {
-                    name: "APPOINT DATE",
-                    selector: (row) => row["appointmentDate"],
-                    sortable: false,
-                    minWidth: "130px",
-                    cell: (row) => (
-                      <p className="text-bold-500 text-truncate mb-0">
-                        {row.appointmentDate ? row.appointmentDate.split('T')[0] : "N/A"}
-                      </p>
-                    ),
-                  },
-                  {
-                    name: "PAYMENT SLIP",
-                    selector: (row) => row[""],
-                    sortable: false,
-                    minWidth: "150px",
-                    cell: (row) => (
-                      <div className={"mid-center"}>
-                        <div
-                          onClick={() => {
-                            window.open(row.paymentSlipUrl)
-                          }}
-                        >
-                          <File size={25} color={"#05930d"} />
-                        </div>
-                      </div>
-                    ),
-                  },
-                  {
-                    name: "DOCTOR RECEIPT",
-                    selector: (row) => row[""],
-                    sortable: false,
-                    minWidth: "150px",
-                    cell: (row) => (
-                      <div className={"mid-center"}>
-                        {row.doctorReceiptUrl ?
-                          <div
-                            onClick={() => {
-                              window.open(row.doctorReceiptUrl)
-                            }}
-                          >
-                            <File size={25} color={"#05930d"} />
-                          </div> : 'N/A'}
-                      </div>
-                    ),
-                  },
-                  {
-                    name: "TOTAL FEE",
-                    selector: (row) => row["total"],
-                    sortable: false,
-                    minWidth: "130px",
-                    cell: (row) => (
-                      <p className="text-bold-500 text-truncate mb-0">
-                        {row.total ?  `Rs ${row.total}` : "N/A"}
-                      </p>
-                    ),
-                  },
-                  {
-                    name: "STATUS",
-                    selector: (row) => row["status"],
-                    minWidth: "150px",
-                    sortable: false,
-                    cell: (row) => (
-                      <p className="text-bold-500 text-truncate mb-0">
-                        {row.status === 'ACTIVE' ? "ACCEPTED" : row.status}
-                      </p>
-                    ),
-                  },
-                  {
-                    name: "NOTE",
-                    selector: (row) => row["remark"],
-                    sortable: false,
+                    name: "ACTIONS",
                     minWidth: "200px",
-                    cell: (row) => (
-                      <p className="text-bold-500 mb-0">
-                        {row.remark ?? "N/A"}
-                      </p>
-                    ),
-                  },
-                  {
-                    name: "OPTIONS",
                     selector: (row) => row[""],
                     sortable: false,
-                    minWidth: "300px",
                     cell: (row) => (
-                      <div>
-                        {row.status === "PENDING" ?   <div className={"d-flex"}>
-                          <button style={{marginRight:'5px'}} className="btn  btn-success" onClick={()=> {statusChangeHandler(row.id,'ACTIVE')}}>Accept</button>
-                          <button className="btn btn-danger" onClick={()=> {statusChangeHandler(row.id,'REJECTED')}}>Reject</button>
-                        </div> : row.status === "ACTIVE" ? <button
-                          onClick={()=> {
-                            setIsOpen(true);
-                            setSelectedAppointment(row);
-                            console.log("SELECTED",row)
-                          }} className="btn btn-warning">Upload Report</button> : row.status === "COMPLETED" ? <button   onClick={()=> {
-                          setIsOpen(true);
-                          setSelectedAppointment(row);
-                          console.log("SELECTED",row)
-                        }} className="btn btn-primary">View Report</button> : 'N/A'}
-                      </div>
+                        <div className={"mid-center"}>
+                          <button
+                              className={"tbl-status-btn"}
+                              onClick={() => {
+                                setSelectedAdvance(row);
+                                setIsOpen(true);
+                              }}
+                          >
+                            <Edit size="15" />
+                          </button>
+                          <button
+                              className={"tbl-status-btn"}
+                              onClick={() => deleteConformer(row.id)}
+                          >
+                            <Trash2 size="15" />
+                          </button>
+                        </div>
                     ),
                   },
                 ]}
@@ -302,6 +264,19 @@ const Advance = () => {
               />
             </div>
           </Col>
+        )}
+
+        {!loader && totalPages > 0 && (
+            <div className="w-100 d-flex justify-content-end mt-1 px-3">
+              <Pagination
+                  activePage={pageIndex + 1}
+                  totalNoOfPages={totalPages}
+                  handlePagination={async (page) => {
+                    await setPageIndex(page - 1);
+                    await getAllAdvances(null,page - 1,null,null)
+                  }}
+              />
+            </div>
         )}
       </Row>
 
@@ -312,6 +287,7 @@ const Advance = () => {
         <ModalHeader
           toggle={() => {
             setIsOpen(false);
+            setSelectedAdvance(null);
           }}
           className={"selector-wrapper font-medium-2 inline-flex"}
         >
@@ -319,7 +295,10 @@ const Advance = () => {
         </ModalHeader>
         <ModalBody className="modal-dialog-centered">
 
-          <CreateAdvance/>
+          <CreateAdvance details={selectedAdvance} updateHandler={getAllAdvances} closeModal={() => {
+            setIsOpen(false)
+            setSelectedAdvance(null);
+          }}/>
 
         </ModalBody>
         <ModalFooter></ModalFooter>

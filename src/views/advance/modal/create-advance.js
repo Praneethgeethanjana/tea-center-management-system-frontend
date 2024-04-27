@@ -3,14 +3,17 @@ import React, { useEffect, useState } from "react";
 import { Dropdown } from "semantic-ui-react";
 import { notifyMessage } from "@src/utility/commun-func";
 import Loader from "@components/spinner/Loader";
-import { createFarmer, updateFarmer } from "@src/services/farmers";
+import {createFarmer, getAllFarmers, updateFarmer} from "@src/services/farmers";
 import Flatpickr from "react-flatpickr";
 import moment from "moment";
-const CreateAdvance = ({ detials, closeModal, updateHandler }) => {
-  const [data, setData] = useState(detials ?? {weight:null,cover_weight:null,net_weight:null});
+import {getVariables} from "@src/services/statistics";
+import {createAdvance, updateAdvance} from "@src/services/advance";
+const CreateAdvance = ({ details, closeModal, updateHandler }) => {
+  const [data, setData] = useState(details ?? {});
   const [loading, setLoading] = useState(false);
   const [apiLoader, setApiLoader] = useState(false);
-  const [location, setLocation] = React.useState(null);
+  const [farmers, setFarmers] = React.useState([]);
+  const [selectedFarmer, setSelectedFarmer] = React.useState('');
   const [selectedDate, setSelectedDate] = useState([
     moment(new Date()).format("YYYY-MM-DD"),
   ]);
@@ -18,48 +21,64 @@ const CreateAdvance = ({ detials, closeModal, updateHandler }) => {
 
 
   useEffect( () => {
-    // setLoading(true);
-
+    setLoading(true);
+    if(!details) {
+      getFarmers();
+    } else {
+      setSelectedFarmer(details.user.id)
+      setLoading(false);
+    }
   },[])
 
 
 
+  const getFarmers = async () => {
+    await getAllFarmers().then((res) => {
+      if(res.success) {
+        let array = []
+        if(res?.body?.content) {
+          res.body.content.map((item,index) => {
+            let obj = {
+              key : item.id,
+              text : `${item.id} - ${item.firstName} ${item.lastName}`,
+              value : item.id
+            }
+            array.push(obj);
+          });
+          setFarmers(array);
+        }
+      } else {
+        setFarmers([]);
+      }
+    }).finally(() => {setLoading(false);});
+  }
+
+
+
   const manageHandler = async () => {
-    if (!data.firstName || data.firstName.trim() === "" )
-      return notifyMessage("First name can not be empty", 0);
-    if (!data.lastName || data.lastName.trim() === "" )
-      return notifyMessage("Last name can not be empty", 0);
-    return notifyMessage("Please enter valid mobile number", 0);
-    if (!data.nic || data.nic.trim() === "" )
-      return notifyMessage("NIC can not be empty", 0);
-    if (!data.address || data.address.trim() === "" )
-      return notifyMessage("Address can not be empty", 0);
+    if (!details && (!selectedFarmer || selectedFarmer === ''))
+      return notifyMessage("Please select a farmer", 0);
+    if (!data.amount || data.amount.trim() === "" )
+      return notifyMessage("Amount can not be empty", 0);
+
 
     const obj = {
-      firstName : data.firstName,
-      lastName : data.lastName,
-      address : data.address,
-      latitude : `${location?.lat}`,
-      longitude : `${location?.lng}`,
-      nic : data.nic,
-      bankAccountNumber : data.accountNumber ?? null,
-      bankAccountName : data.accountName ?? null,
-      bankName : data.bankName ?? null,
-      bankBranch: data.branchName ?? null
+        userId : details ? details.user.id : selectedFarmer,
+        amount : data.amount,
+        created : selectedDate[0]
     }
-
-    if(detials) {
-      await updateFarmerHandler(detials.id,obj);
+    if(details) {
+      await updateAdvanceHandler(details.id,obj);
     } else {
-      await createFarmerHandler(obj);
+      await advanceHandler(obj);
     }
 
   };
 
 
-  const createFarmerHandler = async (obj) => {
+  const advanceHandler = async (obj) => {
     setApiLoader(true);
-    await  createFarmer(obj).then((res) => {
+    await createAdvance(obj).then((res) => {
       if(res.success) {
         notifyMessage(res.message,1)
         if(updateHandler) updateHandler();
@@ -70,9 +89,9 @@ const CreateAdvance = ({ detials, closeModal, updateHandler }) => {
     }).finally(()=> { setApiLoader(false)});
   }
 
-  const updateFarmerHandler = async (id,obj) => {
+  const updateAdvanceHandler = async (id,obj) => {
     setApiLoader(true);
-    await updateFarmer(id,obj).then((res) => {
+    await updateAdvance(id,obj).then((res) => {
       if(res.success) {
         notifyMessage(res.message,1)
         if(updateHandler) updateHandler();
@@ -96,41 +115,37 @@ const CreateAdvance = ({ detials, closeModal, updateHandler }) => {
       {loading ? <Loader/> :
         <div className="manage-form">
           <Row>
-            <Col md={6}>
-              <div className="text-wrapper tile-wrapper mt-1">
-                <Label className={"required font-small-4"}>Select Farmer</Label>
-                <Dropdown
-                  disabled={false}
-                  placeholder=""
-                  className={"form-control"}
-                  fluid
-                  selection
-                  search={true}
-                  onChange={(e, { value }) => {
-                    // getMyAppointments(null,null,value)
-                  }}
-                  value={"ALL"}
-                  options={[
-                    { key: "ALL", text: "ALL", value: "ALL" },
-                    { key: "PENDING", text: "PENDING", value: "PENDING" },
-                    { key: "ACTIVE", text: "ACCEPTED", value: "ACTIVE" },
-                    { key: "REJECTED", text: "REJECTED", value: "REJECTED" },
-                    { key: "COMPLETED", text: "COMPLETED", value: "COMPLETED" },
-                  ]}
-                  selectOnBlur={false}
-                />
-              </div>
-            </Col>
+            {details &&   <Label className={" font-small-4"}>Farmer Name : {details?.user?.firstName} {details?.user?.lastName}</Label>}
+            {!details &&
+                <Col md={6}>
+                  <div className="text-wrapper tile-wrapper mt-1">
+                    <Label className={"required font-small-4"}>Select Farmer</Label>
+                    <Dropdown
+                        disabled={details ? true : false}
+                        placeholder=""
+                        className={"form-control"}
+                        fluid
+                        selection
+                        search={true}
+                        onChange={(e, { value }) => {
+                          setSelectedFarmer(value)
+                        }}
+                        value={selectedFarmer}
+                        options={farmers}
+                        selectOnBlur={false}
+                    />
+                  </div>
+                </Col>
+            }
             <Col md={6}>
               <div className={"text-wrapper tile-wrapper mt-1"}>
-                <Label className={"required font-small-4"}>Amount</Label>
+                <Label className={"required font-small-4"}>Amount (Rs)</Label>
                 <Input
                   name={"amount"}
-                  value={data.weight ?? ""}
+                  value={data.amount ?? ""}
                   onChange={(e) => {
                     let val = e.target.value;
-                    if(/^\d*\.?\d{0,2}$/.test(val) || val === '') {
-                      if(val == ".") val = "0."
+                    if(/^\d*$/.test(val) || val === '') {
                       inputHandler(e,val)
                     }
                   }}
@@ -141,7 +156,7 @@ const CreateAdvance = ({ detials, closeModal, updateHandler }) => {
               </div>
             </Col>
             <Col md={6}>
-              <div className={"text-wrapper tile-wrapper"}>
+              <div className={`text-wrapper tile-wrapper ${details ? 'mt-1' : ''}`}>
                 <Label className={"font-small-4"}>Date</Label>
                 <Flatpickr
                   options={{
@@ -167,11 +182,11 @@ const CreateAdvance = ({ detials, closeModal, updateHandler }) => {
           <div className="d-flex justify-content-end">
 
             <button
-              disabled={apiLoader}
+              // disabled={apiLoader}
               className="btn btn-primary mt-3"
               onClick={manageHandler}
             >
-              Advance
+              {details ? 'Update' : 'Advance'}
             </button>
           </div>
         </div>
