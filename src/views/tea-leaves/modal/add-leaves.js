@@ -24,13 +24,14 @@ const AddLeaves = ({ detials, closeModal, updateHandler }) => {
 
   useEffect(  () => {
     setLoading(true);
+
     getFarmers();
 
   },[])
 
   const getFarmers = async () => {
     getVariables().then((res) => {
-      console.log("ADO VARIABLE",res)
+      setTodayTeaPrice(res.body.todayTeaPrice)
     });
    await getAllFarmers().then((res) => {
       if(res.success) {
@@ -62,11 +63,15 @@ const AddLeaves = ({ detials, closeModal, updateHandler }) => {
     const obj = {
       numberOfKg : data.weight,
       bagWeight : 1,
-      todayTeaPrice : 300.00,
+      todayTeaPrice : parseFloat(todayTeaPrice),
       date : selectedDate[0],
       userId : selectedFarmer
     }
-    await addTeaLeavesHandler(obj);
+    if(detials) {
+      await updateTeaLeaveshandler(obj);
+    } else {
+      await addTeaLeavesHandler(obj);
+    }
   };
 
 
@@ -83,7 +88,7 @@ const AddLeaves = ({ detials, closeModal, updateHandler }) => {
     }).finally(()=> { setApiLoader(false)});
   }
 
-  const updateFarmerHandler = async (id,obj) => {
+  const updateTeaLeaveshandler = async (id,obj) => {
     setApiLoader(true);
     await updateFarmer(id,obj).then((res) => {
       if(res.success) {
@@ -100,10 +105,12 @@ const AddLeaves = ({ detials, closeModal, updateHandler }) => {
   const weightInputHandler = (e,val) => {
     let name = e.target.name;
       if(val === "") {
-        setData({...data,['net_weight'] : '',[name]: val})
+        setData({...data,['net_weight'] : '',['total_amount']:'',[name]: val})
       } else {
         let netVal = ((parseFloat(val)) - 1);
-        setData({...data,['net_weight'] : netVal,[name]: val})
+        let tot = null
+        if(todayTeaPrice) tot = (netVal * todayTeaPrice)
+        setData({...data,['net_weight'] : netVal,['total_amount']:tot,[name]: val})
       }
   };
 
@@ -117,6 +124,7 @@ const AddLeaves = ({ detials, closeModal, updateHandler }) => {
     <>
       {loading ? <Loader/> :
         <div className="manage-form">
+          <Label className={"font-medium-1"}>Today Tea Leaves Price for 1Kg : Rs {todayTeaPrice}</Label>
           <Row>
             <Col md={6}>
               <div className="text-wrapper tile-wrapper mt-1">
@@ -137,6 +145,28 @@ const AddLeaves = ({ detials, closeModal, updateHandler }) => {
                 />
               </div>
             </Col>
+
+            <Col md={6}>
+              <div className={"text-wrapper tile-wrapper mt-1"}>
+                <Label className={"font-small-4"}>Given Date</Label>
+                <Flatpickr
+                    options={{
+                      mode: "single",
+                      minDate: moment().subtract(3, "months").toDate(),
+                      maxDate: new Date(),
+                    }}
+                    className="form-control selected-date"
+                    placeholder={"Select date range"}
+                    value={liveDate ? liveDate : selectedDate}
+                    onChange={(date) => {
+                      setLiveDate(date);
+                      setSelectedDate([moment(date[0]).format("YYYY-MM-DD")]);
+
+                    }}
+                />
+              </div>
+            </Col>
+
             <Col md={6}>
               <div className={"text-wrapper tile-wrapper mt-1"}>
                 <Label className={"required font-small-4"}>Weight (Kg)</Label>
@@ -156,7 +186,7 @@ const AddLeaves = ({ detials, closeModal, updateHandler }) => {
               </div>
             </Col>
             <Col md={6}>
-              <div className={"text-wrapper tile-wrapper"}>
+              <div className={"text-wrapper tile-wrapper mt-1"}>
                 <Label className={"required font-small-4"}>Cover Weight (Kg)</Label>
                 <Input
                   name="cover_weight"
@@ -193,24 +223,19 @@ const AddLeaves = ({ detials, closeModal, updateHandler }) => {
 
             <Col md={6}>
               <div className={"text-wrapper tile-wrapper"}>
-                <Label className={"font-small-4"}>Given Date</Label>
-                <Flatpickr
-                  options={{
-                    mode: "single",
-                    minDate: moment().subtract(3, "months").toDate(),
-                    maxDate: new Date(),
-                  }}
-                  className="form-control selected-date"
-                  placeholder={"Select date range"}
-                  value={liveDate ? liveDate : selectedDate}
-                  onChange={(date) => {
-                    setLiveDate(date);
-                    setSelectedDate([moment(date[0]).format("YYYY-MM-DD")]);
-
-                  }}
+                <Label className={"font-small-4"}>Total Amount (Rs)</Label>
+                <Input
+                    name="total_amount"
+                    value={data.total_amount ?? ""}
+                    disabled
+                    type="text"
+                    placeholder="Total Amount"
+                    className={"mb-1"}
                 />
               </div>
             </Col>
+
+
 
 
           </Row>
@@ -222,7 +247,7 @@ const AddLeaves = ({ detials, closeModal, updateHandler }) => {
               className="btn btn-primary mt-3"
               onClick={manageHandler}
             >
-              Add
+              {detials ? 'Update' : 'Add'}
             </button>
           </div>
         </div>

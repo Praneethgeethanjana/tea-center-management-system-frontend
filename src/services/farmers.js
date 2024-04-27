@@ -22,7 +22,7 @@ export async function getFarmers(keyword,page) {
   const apiObject = {};
   apiObject.method = "GET";
   apiObject.authentication = true;
-  apiObject.endpoint = `admin/farmer/user-list?keyword=${keyword}&page=${page}&size=20`;
+  apiObject.endpoint = `admin/farmer/user-list?keyword=${keyword}&page=${page}&size=10`;
   return await ApiService.callApi(apiObject);
 }
 

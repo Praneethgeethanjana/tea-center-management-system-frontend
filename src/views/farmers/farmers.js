@@ -195,7 +195,7 @@ const Farmers = () => {
                     ),
                   },
                   {
-                    name: "ADDRESS",
+                    name: "Address",
                     selector: (row) => row["address"],
                     sortable: false,
                     minWidth: "130px",

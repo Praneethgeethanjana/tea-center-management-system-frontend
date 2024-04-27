@@ -19,11 +19,12 @@ import Loader from "@components/spinner/Loader";
 import moment from "moment/moment";
 import { Checkbox, Dropdown, Form } from "semantic-ui-react";
 import Flatpickr from "react-flatpickr";
-import { Box, Eye, File, Plus } from "react-feather";
+import {Box, Edit, Eye, File, Plus, Trash2} from "react-feather";
 import { useNavigate } from "react-router-dom";
 import AddLeaves from "@src/views/tea-leaves/modal/add-leaves";
-import { getAllTeaLeavesRecords } from "@src/services/tea-leaves";
+import {deleteTeaLeaves, getAllTeaLeavesRecords} from "@src/services/tea-leaves";
 import Pagination from "@components/pagination";
+import swal from "sweetalert";
 
 
 const TeaLeavesForAdmin = () => {
@@ -31,7 +32,7 @@ const TeaLeavesForAdmin = () => {
   const [loader, setLoader] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [leaves, setLeaves] = useState([]);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [selectedStock, setSelectedStock] = useState(null);
   const [status, setStatus] = useState("ALL");
   const [keyword, setKeyword] = useState("");
   const [selectedDates, setSelectedDates] = useState([
@@ -77,6 +78,38 @@ const TeaLeavesForAdmin = () => {
 
     },true)
   }
+
+
+  const deleteConformer = (id) => {
+    swal({
+      title: "Are you sure you want to do this?",
+      closeOnClickOutside: false,
+      buttons: {
+        cancel: "No",
+        dangerMode: { text: "Yes", value: "action", className: "okay-btn" },
+      },
+    }).then(async (value) => {
+      switch (value) {
+        case "action":
+          deleteStockHandler(id);
+          break;
+        default:
+      }
+    });
+  };
+
+  const deleteStockHandler = async (id) => {
+      await deleteTeaLeaves(id).then((res) => {
+        if(res.success) {
+          notifyMessage(res.message,1);
+          getAllTeaLeaves();
+        } else {
+          notifyMessage(res.message,0);
+        }
+      })
+  }
+
+
 
   return (
     <div>
@@ -259,28 +292,29 @@ const TeaLeavesForAdmin = () => {
                       </p>
                     ),
                   },
-
                   {
-                    name: "OPTIONS",
+                    name: "ACTIONS",
+                    minWidth: "200px",
                     selector: (row) => row[""],
                     sortable: false,
-                    minWidth: "300px",
                     cell: (row) => (
-                      <div>
-                        {row.status === "PENDING" ?   <div className={"d-flex"}>
-                          <button style={{marginRight:'5px'}} className="btn  btn-success" onClick={()=> {statusChangeHandler(row.id,'ACTIVE')}}>Accept</button>
-                          <button className="btn btn-danger" onClick={()=> {statusChangeHandler(row.id,'REJECTED')}}>Reject</button>
-                        </div> : row.status === "ACTIVE" ? <button
-                          onClick={()=> {
-                            setIsOpen(true);
-                            setSelectedAppointment(row);
-                            console.log("SELECTED",row)
-                          }} className="btn btn-warning">Upload Report</button> : row.status === "COMPLETED" ? <button   onClick={()=> {
-                          setIsOpen(true);
-                          setSelectedAppointment(row);
-                          console.log("SELECTED",row)
-                        }} className="btn btn-primary">View Report</button> : 'N/A'}
-                      </div>
+                        <div className={"mid-center"}>
+                          {/*<button*/}
+                          {/*    className={"tbl-status-btn"}*/}
+                          {/*    onClick={() => {*/}
+                          {/*      setSelectedStock(row)*/}
+                          {/*      setIsOpen(true);*/}
+                          {/*    }}*/}
+                          {/*>*/}
+                          {/*  <Edit size="15" />*/}
+                          {/*</button>*/}
+                          <button
+                              className={"tbl-status-btn"}
+                              onClick={() => deleteConformer(row.id)}
+                          >
+                            <Trash2 size="15" />
+                          </button>
+                        </div>
                     ),
                   },
                 ]}
@@ -319,7 +353,7 @@ const TeaLeavesForAdmin = () => {
         </ModalHeader>
         <ModalBody className="modal-dialog-centered">
 
-        <AddLeaves closeModal={() => {setIsOpen(false)}}/>
+        <AddLeaves detials={selectedStock ? {} : null} updateHandler={getAllTeaLeaves}  closeModal={() => {setIsOpen(false)}}/>
 
         </ModalBody>
         <ModalFooter></ModalFooter>
