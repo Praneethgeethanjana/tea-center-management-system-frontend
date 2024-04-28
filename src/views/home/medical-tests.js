@@ -13,7 +13,6 @@ import React, { useEffect, useState } from "react";
 import Loader from "@components/spinner/Loader";
 import { Box, Eye, Plus } from "react-feather";
 import { useNavigate } from "react-router-dom";
-import { getMedicalTests } from "@src/services/statistics";
 
 
 const MedicalTests = () => {
@@ -31,15 +30,7 @@ const MedicalTests = () => {
 
  const getAllTests = async () => {
    setLoader(true);
-   await getMedicalTests().then((res) => {
-     if(res.success) {
-       setTests(res.body);
-     } else {
-       setTests([])
-     }
-   }).finally(()=> {
-     setLoader(false);
-   })
+
  }
 
 

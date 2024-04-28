@@ -219,7 +219,7 @@ const Advance = () => {
                     minWidth: "200px",
                     cell: (row) => (
                         <p className="text-bold-500 text-truncate mb-0">
-                          {row.amount}
+                          Rs {row.amount}
                         </p>
                     ),
                   },

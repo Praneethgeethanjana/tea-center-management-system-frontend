@@ -182,12 +182,12 @@ const Stock = () => {
                   },
                   {
                     name: "Qty",
-                    selector: (row) => row["size"],
+                    selector: (row) => row["availableSize"],
                     sortable: false,
                     minWidth: "200px",
                     cell: (row) => (
                       <p className="text-bold-500 text-truncate mb-0">
-                        {row.size} Kg
+                        {row.availableSize} Kg
                       </p>
                     ),
                   },

@@ -201,6 +201,7 @@ table {
 }
 
 .manage-form{
+  width: -webkit-fill-available!important;
   .form-control{
     height: 35px!important;
     //padding-bottom: 1rem!important;

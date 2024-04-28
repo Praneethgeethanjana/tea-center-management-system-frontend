@@ -28,6 +28,14 @@ export async function getAllStockDetails(keyword,page,stockType) {
     const apiObject = {};
     apiObject.method = "GET";
     apiObject.authentication = true;
-    apiObject.endpoint = `admin/stock?keyword=${keyword}&page=${page}&stockType=${stockType}`;
+    apiObject.endpoint = `admin/stock?keyword=${keyword}&page=${page}&size=10&stockType=${stockType}`;
+    return await ApiService.callApi(apiObject);
+}
+
+export async function getAllStockItems() {
+    const apiObject = {};
+    apiObject.method = "GET";
+    apiObject.authentication = true;
+    apiObject.endpoint = `admin/stock?keyword=&page=0&size=500&stockType=ALL`;
     return await ApiService.callApi(apiObject);
 }

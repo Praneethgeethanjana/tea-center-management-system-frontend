@@ -6,8 +6,10 @@ import Loader from "@components/spinner/Loader";
 import { createFarmer, updateFarmer } from "@src/services/farmers";
 import Flatpickr from "react-flatpickr";
 import moment from "moment";
-const MakePayment = ({ detials, closeModal, updateHandler }) => {
-  const [data, setData] = useState(detials ?? {weight:null,cover_weight:null,net_weight:null});
+import {saveMonthlyPayment} from "@src/services/payments";
+import swal from "sweetalert";
+const MakePayment = ({ details, closeModal, updateHandler ,history}) => {
+  const [data, setData] = useState(details ?? {weight:null,cover_weight:null,net_weight:null});
   const [loading, setLoading] = useState(false);
   const [apiLoader, setApiLoader] = useState(false);
   const [location, setLocation] = React.useState(null);
@@ -23,71 +25,73 @@ const MakePayment = ({ detials, closeModal, updateHandler }) => {
   },[])
 
 
+  const conformHandler = () => {
+    swal({
+      title: "Are you sure you want to do this?",
+      closeOnClickOutside: false,
+      buttons: {
+        cancel: "No",
+        dangerMode: { text: "Yes", value: "action", className: "okay-btn" },
+      },
+    }).then(async (value) => {
+      switch (value) {
+        case "action":
+        await manageHandler();
+          break;
+        default:
+      }
+    });
+  };
+
 
   const manageHandler = async () => {
-    if (!data.firstName || data.firstName.trim() === "" )
-      return notifyMessage("First name can not be empty", 0);
-    if (!data.lastName || data.lastName.trim() === "" )
-      return notifyMessage("Last name can not be empty", 0);
-    return notifyMessage("Please enter valid mobile number", 0);
-    if (!data.nic || data.nic.trim() === "" )
-      return notifyMessage("NIC can not be empty", 0);
-    if (!data.address || data.address.trim() === "" )
-      return notifyMessage("Address can not be empty", 0);
-
-    const obj = {
-      firstName : data.firstName,
-      lastName : data.lastName,
-      address : data.address,
-      latitude : `${location?.lat}`,
-      longitude : `${location?.lng}`,
-      nic : data.nic,
-      bankAccountNumber : data.accountNumber ?? null,
-      bankAccountName : data.accountName ?? null,
-      bankName : data.bankName ?? null,
-      bankBranch: data.branchName ?? null
-    }
-
-    if(detials) {
-      await updateFarmerHandler(detials.id,obj);
+    setLoading(true);
+    let year = null
+    let month = null
+    if(details.orderList && details.orderList.length > 0) {
+      let date = details.orderList[0];
+      year = date.created.split("-")[0]
+      month = date.created.split("-")[1]
     } else {
-      await createFarmerHandler(obj);
+      if(details.farmerStocksList && details.farmerStocksList.length > 0) {
+        let date = details.farmerStocksList[0];
+        year = date.created.split("-")[0]
+        month = date.created.split("-")[1]
+      } else {
+        let date = details.advanceList[0];
+        year = date.created.split("-")[0]
+        month = date.created.split("-")[1]
+      }
     }
+  const obj = {
+      "year" : year,
+        "month" : month,
+        "monthlyTotalTeaKg": details.monthlyTotalTeaKg,
+        "monthlyNetTotalTeaKg": details.monthlyNetTotalTeaKg,
+        "monthlyTotalAmount": details.monthlyTotalAmount,
+        "monthlyTotalDeduction": details.monthlyTotalDeduction,
+        "monthlyNetTotal": details.monthlyNetTotal,
+        "totalPendingOrderAmount": details.totalPendingOrderAmount,
+        "totalPendingAdvanceAmount": details.totalPendingAdvanceAmount,
+        "totalPendingBalancePayment": details.totalPendingBalancePayment,
+        "thisPaymentBalanceAmount": details.thisPaymentBalanceAmount,
+        "userId" : details.farmerId
+    }
+    await saveMonthlyPayment(obj).then((res) => {
+      if(res.success){
+        notifyMessage(res.message,1)
+        closeModal();
+        if(updateHandler) updateHandler();
+      } else {
+        notifyMessage(res.message,0)
+      }
+    }).finally(()=> {
+      setLoading(false);
+    })
 
   };
 
 
-  const createFarmerHandler = async (obj) => {
-    setApiLoader(true);
-    await  createFarmer(obj).then((res) => {
-      if(res.success) {
-        notifyMessage(res.message,1)
-        if(updateHandler) updateHandler();
-        closeModal();
-      } else {
-        notifyMessage(res.message,0);
-      }
-    }).finally(()=> { setApiLoader(false)});
-  }
-
-  const updateFarmerHandler = async (id,obj) => {
-    setApiLoader(true);
-    await updateFarmer(id,obj).then((res) => {
-      if(res.success) {
-        notifyMessage(res.message,1)
-        if(updateHandler) updateHandler();
-        closeModal();
-      } else {
-        notifyMessage(res.message,0);
-      }
-    }).finally(()=> { setApiLoader(false)});
-  }
-
-
-  const inputHandler = (e,val) => {
-    let name = e.target.name;
-    setData({ ...data, [name]: val });
-  };
 
 
 
@@ -96,71 +100,117 @@ const MakePayment = ({ detials, closeModal, updateHandler }) => {
       {loading ? <Loader/> :
         <div className="manage-form">
           <Row>
+            {!history ? <h5>Farmer Name : {details.farmerFirstName + ' ' + details.farmerLastName}</h5>  :
+           <h5>Farmer Name : {details?.user?.firstName + ' ' + details?.user?.lastName}</h5> }
             <Col md={6}>
               <div className="text-wrapper tile-wrapper mt-1">
-                <Label className={"required font-small-4"}>Select Farmer</Label>
-                <Dropdown
-                  disabled={false}
-                  placeholder=""
-                  className={"form-control"}
-                  fluid
-                  selection
-                  search={true}
-                  onChange={(e, { value }) => {
-                    // getMyAppointments(null,null,value)
-                  }}
-                  value={"ALL"}
-                  options={[
-                    { key: "ALL", text: "ALL", value: "ALL" },
-                    { key: "PENDING", text: "PENDING", value: "PENDING" },
-                    { key: "ACTIVE", text: "ACCEPTED", value: "ACTIVE" },
-                    { key: "REJECTED", text: "REJECTED", value: "REJECTED" },
-                    { key: "COMPLETED", text: "COMPLETED", value: "COMPLETED" },
-                  ]}
-                  selectOnBlur={false}
+                <Label className={" font-small-4"}>Monthly Total Tea Leaves (Kg)</Label>
+                <Input
+                    name={"amount"}
+                    value={details?.monthlyTotalTeaKg ?? ""}
+                    disabled
+                    type="text"
+                    placeholder="Amount"
+                    className={"mb-1"}
                 />
               </div>
             </Col>
             <Col md={6}>
               <div className={"text-wrapper tile-wrapper mt-1"}>
-                <Label className={"required font-small-4"}>Amount</Label>
+                <Label className={" font-small-4"}>Monthly Net Total Tea Leaves (Kg)</Label>
                 <Input
+                    disabled
                   name={"amount"}
-                  value={data.weight ?? ""}
-                  onChange={(e) => {
-                    let val = e.target.value;
-                    if(/^\d*\.?\d{0,2}$/.test(val) || val === '') {
-                      if(val == ".") val = "0."
-                      inputHandler(e,val)
-                    }
-                  }}
+                  value={details?.monthlyNetTotalTeaKg ?? ""}
                   type="text"
-                  placeholder="Amount"
+                  placeholder="monthlyNetTotalTeaKg"
                   className={"mb-1"}
                 />
               </div>
             </Col>
             <Col md={6}>
-              <div className={"text-wrapper tile-wrapper"}>
-                <Label className={"font-small-4"}>Date</Label>
-                <Flatpickr
-                  options={{
-                    mode: "single",
-                    minDate: moment().subtract(2, "months").toDate(),
-                    maxDate: new Date(),
-                  }}
-                  className="form-control selected-date"
-                  placeholder={"Select a date"}
-                  value={liveDate ? liveDate : selectedDate}
-                  onChange={(date) => {
-                    setLiveDate(date);
-                    setSelectedDate([moment(date[0]).format("YYYY-MM-DD")]);
-
-                  }}
+              <div className={"text-wrapper tile-wrapper mt-1"}>
+                <Label className={"font-small-4"}>Monthly Total Amount (Rs)</Label>
+                <Input
+                    disabled
+                    name={"amount"}
+                    value={details?.monthlyTotalAmount ?? ""}
+                    type="text"
+                    placeholder="monthlyTotalAmount"
+                    className={"mb-1"}
                 />
               </div>
             </Col>
 
+            <Col md={6}>
+              <div className={"text-wrapper tile-wrapper mt-1"}>
+                <Label className={"font-small-4"}>Pending Order Amount - For Tea/Fertilizers (Rs)</Label>
+                <Input
+                    disabled
+                    name={"totalPendingOrderAmount"}
+                    value={details?.totalPendingOrderAmount ?? ""}
+                    type="text"
+                    placeholder="totalPendingOrderAmount"
+                    className={"mb-1"}
+                />
+              </div>
+            </Col>
+
+            <Col md={6}>
+              <div className={"text-wrapper tile-wrapper mt-1"}>
+                <Label className={"font-small-4"}>Total Pending Advance Amount (Rs)</Label>
+                <Input
+                    disabled
+                    name={"amount"}
+                    value={details?.totalPendingAdvanceAmount ?? ""}
+                    type="text"
+                    placeholder="totalPendingAdvanceAmount"
+                    className={"mb-1"}
+                />
+              </div>
+            </Col>
+
+            <Col md={6}>
+              <div className={"text-wrapper tile-wrapper mt-1"}>
+                <Label className={"font-small-4"}>Monthly Deduction (Advance + Orders) Rs</Label>
+                <Input
+                    disabled
+                    name={"amount"}
+                    value={details?.monthlyTotalDeduction ?? ""}
+                    type="text"
+                    placeholder="monthlyTotalAmount"
+                    className={"mb-1"}
+                />
+              </div>
+            </Col>
+
+            <Col md={6}>
+              <div className={"text-wrapper tile-wrapper mt-1"}>
+                <Label className={"font-small-4"}>Total Pending Balance Payment (Rs)</Label>
+                <Input
+                    disabled
+                    name={"totalPendingBalancePayment"}
+                    value={details?.totalPendingBalancePayment ?? ""}
+                    type="text"
+                    placeholder="totalPendingBalancePayment"
+                    className={"mb-1"}
+                />
+              </div>
+            </Col>
+
+            <Col md={6}>
+              <div className={"text-wrapper tile-wrapper mt-1"}>
+                <Label className={"font-small-4"}>Monthly Net Total (Rs)</Label>
+                <Input
+                    disabled
+                    name={"monthlyNetTotal"}
+                    value={details?.monthlyNetTotal ?? ""}
+                    type="text"
+                    placeholder="monthlyNetTotal"
+                    className={"mb-1"}
+                />
+              </div>
+            </Col>
 
           </Row>
 
@@ -169,9 +219,11 @@ const MakePayment = ({ detials, closeModal, updateHandler }) => {
             <button
               disabled={apiLoader}
               className="btn btn-primary mt-3"
-              onClick={manageHandler}
+              onClick={()=> {
+                history ? closeModal() : conformHandler()
+              }}
             >
-              Advance
+              {history ? "Ok" : "Release Payment"}
             </button>
           </div>
         </div>

@@ -16,7 +16,7 @@ import { notifyMessage } from "@src/utility/commun-func";
 import { adminLogin, userLogin } from "@src/services/auth";
 import qs from "qs";
 import {
-  ACCESS_TOKEN, BASE_ROUTE_PATH, FARMERS_ROUTE,
+  ACCESS_TOKEN, BASE_ROUTE_PATH, DASHBOARD_ROUTE_PATH, FARMERS_ROUTE,
 
   REFRESH_TOKEN, ROLE_ADMIN, ROLE_FARMER,
   SOMETHING_WENT_WRONG_MSG, TEST_ROUTE_PATH
@@ -59,19 +59,15 @@ const Login = () => {
       if (res.access_token) {
         localStorage.setItem(ACCESS_TOKEN, res.access_token);
         localStorage.setItem(REFRESH_TOKEN, res.refresh_token);
-        localStorage.setItem("USER_ROLE", ROLE_FARMER);
 
          const role = res.user.authorities[0].authority
 
         if(role === "ROLE_USER") {
           localStorage.setItem("USER_ROLE",ROLE_FARMER)
-          window.location.href = TEST_ROUTE_PATH
         } else {
           localStorage.setItem("USER_ROLE",ROLE_ADMIN)
-          window.location.href = FARMERS_ROUTE
         }
-
-
+        window.location.href = DASHBOARD_ROUTE_PATH
         // navigate(APPOINTMENTS_ROUTE)
 
       } else {

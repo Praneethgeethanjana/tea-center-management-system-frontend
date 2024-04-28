@@ -27,7 +27,7 @@ import {
   TEST_ROUTE_PATH,
   FARMERS_ROUTE,
   TEA_LEAVES_ROUTE,
-  STOCK_ROUTE, ADVANCE_ROUTE, PAYMENTS_ROUTE
+  STOCK_ROUTE, ADVANCE_ROUTE, PAYMENTS_ROUTE, ORDERS_ROUTE, PAYMENT_HISTORY_ROUTE
 } from "@configs/constant";
 
 const getLayout = {
@@ -50,6 +50,8 @@ const Farmers = lazy(() => import("../../views/farmers/farmers"));
 const Stock = lazy(() => import("../../views/stock/index"));
 const Advance = lazy(() => import("../../views/advance/index"));
 const Payments = lazy(() => import("../../views/payments/index"));
+const PaymentHistory = lazy(() => import("../../views/payments/payment-history"));
+const Orders = lazy(() => import("../../views/order/index"));
 const MedicalTests = lazy(() => import("../../views/home/medical-tests"));
 const Dashboard = lazy(() => import("../../views/home/statistics"));
 
@@ -99,6 +101,14 @@ const Routes = [
   {
     path: PAYMENTS_ROUTE,
     element: <Payments/>,
+  },
+  {
+    path: PAYMENT_HISTORY_ROUTE,
+    element: <PaymentHistory/>,
+  },
+  {
+    path: ORDERS_ROUTE,
+    element: <Orders/>,
   },
   {
     path: ROUTE_LOGIN,

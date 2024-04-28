@@ -2,11 +2,11 @@ import ApiService from "@src/services/api-service";
 
 
 
-export async function getMedicalTests() {
+export async function getStatistics() {
   const apiObject = {};
   apiObject.method = "GET";
   apiObject.authentication = true;
-  apiObject.endpoint = "user/medical-test";
+  apiObject.endpoint = "admin/statistics";
   apiObject.body = null;
   return await ApiService.callApi(apiObject);
 }

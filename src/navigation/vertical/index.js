@@ -6,13 +6,20 @@ import {
   Feather,
   Map,
   MessageSquare,
-  Users, Book, CheckSquare, FolderPlus, Bookmark, DollarSign
+  Users, Book, CheckSquare, FolderPlus, Bookmark, DollarSign, Archive
 } from "react-feather";
 import {
   USER_ROLE,
   ROLE_ADMIN,
   DASHBOARD_ROUTE_PATH,
-  FARMERS_ROUTE, ROLE_FARMER, TEA_LEAVES_ROUTE, STOCK_ROUTE, ADVANCE_ROUTE, PAYMENTS_ROUTE
+  FARMERS_ROUTE,
+  ROLE_FARMER,
+  TEA_LEAVES_ROUTE,
+  STOCK_ROUTE,
+  ADVANCE_ROUTE,
+  PAYMENTS_ROUTE,
+  ORDERS_ROUTE,
+  PAYMENT_HISTORY_ROUTE
 } from "../../configs/constant";
 
 
@@ -46,6 +53,13 @@ import {
      roles:[ROLE_ADMIN,ROLE_FARMER]
    },
    {
+     id: "orders",
+     title: "Orders",
+     icon: <Archive size={20} />,
+     navLink: ORDERS_ROUTE,
+     roles:[ROLE_ADMIN,ROLE_FARMER]
+   },
+   {
      id: "advance",
      title: "Advance",
      icon: <Bookmark size={20} />,
@@ -57,6 +71,13 @@ import {
      title: "Payments",
      icon: <DollarSign size={20} />,
      navLink: PAYMENTS_ROUTE,
+     roles:[ROLE_ADMIN,ROLE_FARMER]
+   },
+   {
+     id: "payment-history",
+     title: "Payment History",
+     icon: <DollarSign size={20} />,
+     navLink: PAYMENT_HISTORY_ROUTE,
      roles:[ROLE_ADMIN,ROLE_FARMER]
    },
 ];
