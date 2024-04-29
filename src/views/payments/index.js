@@ -9,6 +9,7 @@ import {
 } from "reactstrap";
 import DataTable from "react-data-table-component";
 import React, { useEffect, useState } from "react";
+import "react-datepicker/dist/react-datepicker.css";
 
 import {
   checkAMPM,
@@ -24,6 +25,9 @@ import { useNavigate } from "react-router-dom";
 import MakePayment from "@src/views/payments/modal/make-payment";
 import {getPendingPayments} from "@src/services/payments";
 import Pagination from "@components/pagination";
+import TeaLeavesRecords from "@src/views/payments/modal/tea-leaves-records";
+import AdvanceRecords from "@src/views/payments/modal/advance-details";
+import MonthPicker from "@components/month-picker";
 
 const  TEST_ARRAY =  [
   {
@@ -135,7 +139,11 @@ const Payments = () => {
     moment(new Date()).subtract(1, "month").format("YYYY/MM/DD"),
     moment(new Date()).format("YYYY/MM/DD")
   ]);
-  const [liveDate, setLiveDate] = useState(null);
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1;
+  const initialDate = `${currentYear}/${currentMonth.toString().padStart(2, '0')}`;
+  const [date, setDate] = useState(new Date(initialDate));
   const [totalPages, setTotalPages] = useState("");
   const [pageIndex, setPageIndex] = useState(0);
 
@@ -145,21 +153,24 @@ const Payments = () => {
   }, [keyword]);
 
 
-  const getAllPaymentDetails = async (search,page) => {
+  const getAllPaymentDetails = async (search,page,pickedDate) => {
     setLoader(true);
-    getPendingPayments(search ?? keyword,page || page === 0 ? page : pageIndex,moment(new Date()).format("YYYY/MM/DD")).then((res)=> {
+    const inputDate = pickedDate ? new Date(pickedDate) : new Date(date);
+    getPendingPayments(search ?? keyword,page || page === 0 ? page : pageIndex,moment(inputDate).format('YYYY/MM/DD')).then((res)=> {
       if(res.success){
         setPageIndex(res.body.number);
         setTotalPages(res.body.totalPages);
         setPayments(res.body.content)
       }
     }).finally(()=> {setLoader(false)})
-
   }
 
-  const statusChangeHandler = (id,action) => {
-    errorSweetAlert("Are you sure?","",action === "ACTIVE" ? "Accept" : action === "COMPLETED" ? "Yes, Complete" : "Yes,Reject",()=> {
-    },true)
+  const closeHandler = () => {
+    setIsOpen(false);
+    setSelectedPaymentDetails(null);
+    setSelectedAdvances(null);
+    setSelectedTeaLeavesList(null);
+    setSelectedOrderList(null);
   }
 
 
@@ -192,55 +203,13 @@ const Payments = () => {
                   <Input placeholder={'Search by farmer'}  onChange={(e)=> {setKeyword(e.target.value)}} />
                 </div>
               </Col>
-              {/*<Col xs={12} sm={6} md={3}>*/}
-              {/*  <div className="px-0 px-sm-2">*/}
-              {/*    <p className="mb-0">Status</p>*/}
-              {/*    <Dropdown*/}
-              {/*      disabled={false}*/}
-              {/*      placeholder=""*/}
-              {/*      className={"form-control"}*/}
-              {/*      fluid*/}
-              {/*      selection*/}
-              {/*      search={false}*/}
-              {/*      onChange={(e, { value }) => {*/}
-              {/*        setStatus(value);*/}
-              {/*        // getMyAppointments(null,null,value)*/}
-              {/*      }}*/}
-              {/*      value={status}*/}
-              {/*      options={[*/}
-              {/*        { key: "ALL", text: "ALL", value: "ALL" },*/}
-              {/*        { key: "PENDING", text: "PENDING", value: "PENDING" },*/}
-              {/*        { key: "ACTIVE", text: "ACCEPTED", value: "ACTIVE" },*/}
-              {/*        { key: "REJECTED", text: "REJECTED", value: "REJECTED" },*/}
-              {/*        { key: "COMPLETED", text: "COMPLETED", value: "COMPLETED" },*/}
-              {/*      ]}*/}
-              {/*      selectOnBlur={false}*/}
-              {/*    />*/}
-              {/*  </div>*/}
-              {/*</Col>*/}
+              <Col xs={12} sm={6} md={3}>
+                <div className="px-0 px-sm-2">
+                  <p className="mb-0">Month</p>
+                    <MonthPicker updateHandler={getAllPaymentDetails} date={date} setDate={setDate}/>
+                </div>
+              </Col>
 
-              {/*<Col xs={12} sm={6} md={3}>*/}
-              {/*  <div className="px-0 mt-2 mt-sm-0 px-sm-2">*/}
-              {/*    <p className="mb-0">Date</p>*/}
-              {/*    <Flatpickr*/}
-              {/*      options={{*/}
-              {/*        mode: "range",*/}
-              {/*        dateFormat: 'Y/m/d',*/}
-              {/*      }}*/}
-              {/*      className="form-control selected-date"*/}
-              {/*      placeholder={"Select date range"}*/}
-              {/*      value={liveDate ? liveDate : selectedDates}*/}
-              {/*      onChange={(date) => {*/}
-              {/*        setLiveDate(date);*/}
-              {/*        setSelectedDates([*/}
-              {/*          moment(date[0]).format("YYYY/MM/DD"),*/}
-              {/*          moment(date[1]).format("YYYY/MM/DD"),*/}
-              {/*        ]);*/}
-              {/*        // getMyAppointments( moment(date[0]).format("YYYY/MM/DD"),moment(date[1]).format("YYYY/MM/DD"),null)*/}
-              {/*      }}*/}
-              {/*    />*/}
-              {/*  </div>*/}
-              {/*</Col>*/}
 
             </div>
           </Row>
@@ -306,7 +275,7 @@ const Payments = () => {
                     name: "MONTHLY NET TOTAL",
                     selector: (row) => row["monthlyNetTotal"],
                     sortable: false,
-                    minWidth: "150px",
+                    minWidth: "180px",
                     cell: (row) => (
                         <p className="text-bold-500 text-truncate mb-0">
                           {row.monthlyNetTotal ?? "N/A"}
@@ -314,47 +283,77 @@ const Payments = () => {
                     ),
                   },
                   {
-                    name: "PAYMENT DETAILS",
+                    name: "PAYMENT",
                     selector: (row) => row[""],
                     sortable: false,
                     minWidth: "150px",
+                    cell: (row) => (
+                        <div className="mid-center">
+                          {/*<div*/}
+                          {/*    onClick={() => {*/}
+                          {/*      setIsOpen(true);*/}
+                          {/*      setSelectedTeaLeavesList(null);*/}
+                          {/*      setSelectedAdvances(null);*/}
+                          {/*      setSelectedOrderList(null);*/}
+                          {/*      setSelectedPaymentDetails(row);*/}
+                          {/*    }}*/}
+                          {/*>*/}
+                          {/*  <Eye size={25} color={"#05930d"} />*/}
+                          {/*</div>*/}
+                          <button onClick={() => {
+                            setIsOpen(true);
+                            setSelectedTeaLeavesList(null);
+                            setSelectedAdvances(null);
+                            setSelectedOrderList(null);
+                            setSelectedPaymentDetails(row);
+                          }} className="btn btn-warning">
+                            Confirm
+                          </button>
+                        </div>
+                    ),
+                  },
+                  {
+                    name: "TEA LEAVES RECORDS",
+                    selector: (row) => row[""],
+                    sortable: false,
+                    minWidth: "180px",
+                    cell: (row) => (
+                        <div className="mid-center">
+                          <div
+                              onClick={() => {
+                                setIsOpen(true);
+                                setSelectedTeaLeavesList(row);
+                                setSelectedAdvances(null);
+                                setSelectedOrderList(null);
+                                setSelectedPaymentDetails(null);
+                              }}
+                          >
+                            <Eye size={25} color={"#05930d"} />
+                          </div>
+
+                        </div>
+                    ),
+                  },
+                  {
+                    name: "ADVANCE DETAILS",
+                    selector: (row) => row[""],
+                    sortable: false,
+                    minWidth: "180px",
                     cell: (row) => (
                         <div className="mid-center">
                           <div
                               onClick={() => {
                                 setIsOpen(true);
                                 setSelectedTeaLeavesList(null);
-                                setSelectedAdvances(null);
+                                setSelectedAdvances(row);
                                 setSelectedOrderList(null);
-                                setSelectedPaymentDetails(row);
+                                setSelectedPaymentDetails(null);
                               }}
                           >
                             <Eye size={25} color={"#05930d"} />
                           </div>
+
                         </div>
-                    ),
-                  },
-                  {
-                    name: "OPTIONS",
-                    selector: (row) => row[""],
-                    sortable: false,
-                    minWidth: "300px",
-                    cell: (row) => (
-                      <div>
-                        {row.status === "PENDING" ?   <div className={"d-flex"}>
-                          <button style={{marginRight:'5px'}} className="btn  btn-success" onClick={()=> {statusChangeHandler(row.id,'ACTIVE')}}>Accept</button>
-                          <button className="btn btn-danger" onClick={()=> {statusChangeHandler(row.id,'REJECTED')}}>Reject</button>
-                        </div> : row.status === "ACTIVE" ? <button
-                          onClick={()=> {
-                            setIsOpen(true);
-
-                            console.log("SELECTED",row)
-                          }} className="btn btn-warning">Upload Report</button> : row.status === "COMPLETED" ? <button   onClick={()=> {
-                          setIsOpen(true);
-
-                          console.log("SELECTED",row)
-                        }} className="btn btn-primary">View Report</button> : 'N/A'}
-                      </div>
                     ),
                   },
                 ]}
@@ -392,13 +391,9 @@ const Payments = () => {
         </ModalHeader>
         <ModalBody className="modal-dialog-centered">
 
-          <MakePayment updateHandler={getAllPaymentDetails} details={selectedPaymentDetails} closeModal={()=> {
-            setIsOpen(false);
-            setSelectedPaymentDetails(null);
-            setSelectedAdvances(null);
-            setSelectedTeaLeavesList(null);
-            setSelectedOrderList(null);
-          }}/>
+          {selectedPaymentDetails ?
+              <MakePayment updateHandler={getAllPaymentDetails} details={selectedPaymentDetails} closeModal={closeHandler}/> : selectedTeaLeavesList ? <TeaLeavesRecords details={selectedTeaLeavesList.farmerStocksList} totalAmount={selectedTeaLeavesList.monthlyTotalAmount} closeModal={closeHandler}/> :
+          selectedAdvances ? <AdvanceRecords closeModal={closeHandler} details={selectedAdvances.advanceList} totalAmount={selectedAdvances.totalPendingAdvanceAmount}/> : null}
 
         </ModalBody>
         <ModalFooter></ModalFooter>
