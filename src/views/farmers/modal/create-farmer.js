@@ -40,42 +40,21 @@ const CreateFarmer = ({ farmer, closeModal, updateHandler }) => {
 
 
   const manageHandler = async () => {
-    if (!data.firstName || data.firstName.trim() === "" )
-      return notifyMessage("First name can not be empty", 0);
-    if (!data.lastName || data.lastName.trim() === "" )
-      return notifyMessage("Last name can not be empty", 0);
-    if (mobile.contactNumber.trim() === "")
-      return notifyMessage("Mobile can not be empty", 0);
-    if (!allPhoneValidation.test(mobile.contactNumber))
-      return notifyMessage("Please enter valid mobile number", 0);
-    if (!data.nic || data.nic.trim() === "" )
-      return notifyMessage("NIC can not be empty", 0);
-    if (!data.address || data.address.trim() === "" )
-      return notifyMessage("Address can not be empty", 0);
+    if (!data.firstName || data.firstName.trim() === "" ) return notifyMessage("First name can not be empty", 0);
+    if (!data.lastName || data.lastName.trim() === "" ) return notifyMessage("Last name can not be empty", 0);
+    if (mobile.contactNumber.trim() === "") return notifyMessage("Mobile can not be empty", 0);
+    if (!allPhoneValidation.test(mobile.contactNumber)) return notifyMessage("Please enter valid mobile number", 0);
+    if (!data.nic || data.nic.trim() === "" ) return notifyMessage("NIC can not be empty", 0);
+    if (!data.address || data.address.trim() === "" ) return notifyMessage("Address can not be empty", 0);
 
-    const obj = {
-      firstName : data.firstName,
-      lastName : data.lastName,
-      mobile: mobile?.contactNumber,
-      address : data.address,
-      latitude : `${location?.lat}`,
-      longitude : `${location?.lng}`,
-      nic : data.nic,
-      bankAccountNumber : data.accountNumber ?? null,
-      bankAccountName : data.accountName ?? null,
-      bankName : data.bankName ?? null,
-      bankBranch: data.branchName ?? null
-    }
+    const obj = {firstName : data.firstName, lastName : data.lastName, mobile: mobile?.contactNumber, address : data.address, latitude : `${location?.lat}`, longitude : `${location?.lng}`, nic : data.nic, bankAccountNumber : data.accountNumber ?? null, bankAccountName : data.accountName ?? null, bankName : data.bankName ?? null, bankBranch: data.branchName ?? null}
 
     if(farmer) {
     await updateFarmerHandler(farmer.id,obj);
     } else {
      await createFarmerHandler(obj);
     }
-
   };
-
-
  const createFarmerHandler = async (obj) => {
    setApiLoader(true);
    await  createFarmer(obj).then((res) => {

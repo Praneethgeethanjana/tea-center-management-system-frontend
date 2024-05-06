@@ -44,7 +44,7 @@ const DefaultRoute =   FARMERS_ROUTE ;
 
 const Home = lazy(() => import("../../views/home"));
 
-const Reports = lazy(() => import("../../views/test-reports/test-reports"));
+const Reports = lazy(() => import("../../views/report/index"));
 const TeaLeaves = lazy(() => import("../../views/tea-leaves/index"));
 const Farmers = lazy(() => import("../../views/farmers/farmers"));
 const Stock = lazy(() => import("../../views/stock/index"));

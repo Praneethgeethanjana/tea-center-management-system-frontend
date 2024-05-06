@@ -6,7 +6,7 @@ import {
   Feather,
   Map,
   MessageSquare,
-  Users, Book, CheckSquare, FolderPlus, Bookmark, DollarSign, Archive
+  Users, Book, CheckSquare, FolderPlus, Bookmark, DollarSign, Archive, File
 } from "react-feather";
 import {
   USER_ROLE,
@@ -19,7 +19,7 @@ import {
   ADVANCE_ROUTE,
   PAYMENTS_ROUTE,
   ORDERS_ROUTE,
-  PAYMENT_HISTORY_ROUTE
+  PAYMENT_HISTORY_ROUTE, REPORTS_ROUTE
 } from "../../configs/constant";
 
 
@@ -78,6 +78,13 @@ import {
      title: "Payment History",
      icon: <DollarSign size={20} />,
      navLink: PAYMENT_HISTORY_ROUTE,
+     roles:[ROLE_ADMIN,ROLE_FARMER]
+   },
+   {
+     id: "download-reports",
+     title: "Download Reports",
+     icon: <File size={20} />,
+     navLink: REPORTS_ROUTE,
      roles:[ROLE_ADMIN,ROLE_FARMER]
    },
 ];

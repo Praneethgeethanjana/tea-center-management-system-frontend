@@ -19,4 +19,12 @@ export async function getVariables() {
   apiObject.body = null;
   return await ApiService.callApi(apiObject);
 }
+export async function changePrices(obj) {
+  const apiObject = {};
+  apiObject.method = "PUT";
+  apiObject.authentication = true;
+  apiObject.endpoint = "admin/system-variable";
+  apiObject.body = obj;
+  return await ApiService.callApi(apiObject);
+}
 

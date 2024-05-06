@@ -124,8 +124,6 @@ const CreateOrder = ({ details, closeModal, updateHandler }) => {
         }
       await createOrderHandler(obj);
     };
-
-
     const createOrderHandler = async (obj) => {
         setApiLoader(true);
         await createOrder(obj).then((res) => {

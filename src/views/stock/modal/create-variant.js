@@ -138,7 +138,7 @@ const CreateVariant = ({ details, closeModal, updateHandler }) => {
             </Col>
             <Col md={6}>
               <div className={"text-wrapper tile-wrapper"}>
-                <Label className={"required font-small-4"}>Size</Label>
+                <Label className={"required font-small-4"}>Size (Kg)</Label>
                 <Input
                   name={"size"}
                   value={data.size ?? ""}
@@ -157,7 +157,7 @@ const CreateVariant = ({ details, closeModal, updateHandler }) => {
 
             <Col md={6}>
               <div className={"text-wrapper tile-wrapper"}>
-                <Label className={"required font-small-4"}>Price</Label>
+                <Label className={"required font-small-4"}>Price of 1Kg (Rs)</Label>
                 <Input
                   name="price"
                   value={data.price ?? ""}

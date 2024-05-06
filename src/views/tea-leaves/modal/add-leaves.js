@@ -57,26 +57,16 @@ const AddLeaves = ({ detials, closeModal, updateHandler }) => {
 
   const manageHandler = async () => {
     if(selectedFarmer === '') return notifyMessage("Please select a farmer",0)
-    if (!data.weight || data.weight.trim() === "" )
-      return notifyMessage("Weight can not be empty", 0);
-    if (!data.cover_weight || data.cover_weight.trim() === "" )
-      return notifyMessage("Bag weight can not be empty", 0);
+    if (!data.weight || data.weight.trim() === "" ) return notifyMessage("Weight can not be empty", 0);
+    if (!data.cover_weight || data.cover_weight.trim() === "" ) return notifyMessage("Bag weight can not be empty", 0);
 
-    const obj = {
-      numberOfKg : data.weight,
-      bagWeight : data.cover_weight,
-      todayTeaPrice : parseFloat(todayTeaPrice),
-      date : selectedDate[0],
-      userId : selectedFarmer
-    }
+    const obj = {numberOfKg : data.weight, bagWeight : data.cover_weight, todayTeaPrice : parseFloat(todayTeaPrice), date : selectedDate[0], userId : selectedFarmer}
     if(detials) {
       await updateTeaLeaveshandler(obj);
     } else {
       await addTeaLeavesHandler(obj);
     }
   };
-
-
   const addTeaLeavesHandler = async (obj) => {
     setApiLoader(true);
     await  addTeaLeaves(obj).then((res) => {
