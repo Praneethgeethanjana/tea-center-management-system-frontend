@@ -40,7 +40,7 @@ const getLayout = {
 
 
 // ** Default Route
-const DefaultRoute =   FARMERS_ROUTE ;
+const DefaultRoute =   DASHBOARD_ROUTE_PATH ;
 
 const Home = lazy(() => import("../../views/home"));
 
