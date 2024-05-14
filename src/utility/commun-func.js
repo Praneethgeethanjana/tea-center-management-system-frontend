@@ -135,45 +135,35 @@ export const exportCSVFile = (items, fileTitle) => {
   }
 };
 
-export const downloadCSV = (data, columns, name) => {
-  const csvData = [
-    columns,
-    ...data.map((row) => [
-      row.shipmentNumber,
-      row.shipmentReference,
-      row.poNumber,
-      row.date,
-      row.companyName,
-      row.status,
-      row.driver,
-      row.id,
-      row.senderId,
-      row.receiverId,
-      row.shipmentDescription,
-      row.temperatureRequirements,
-      row.temperatureRequirementsCelsius,
-      row.createdBy,
-      row.dateFrom,
-      row.dateTo,
-      row.orgCode,
-      row.address1,
-      row.address2,
-      row.UNLOCO,
-      row.buildingName,
-      row.country,
-      row.contactNumber,
-      row.contactName,
-      row.contactEmail,
-      row.routeId,
-      row.routeName,
-      row.driverName,
-      row.comment,
-      row.acceptedDate,
-      row.completedDate,
-      row.signatures,
-      row.images,
-    ]),
-  ];
+export const downloadCSV = (data, columns, name,isPayment) => {
+  let csvData = []
+   if(isPayment) {
+     csvData = [
+       columns,
+       ...data.map((row) => [
+         row.id,
+         row.user?.firstName + ' ' + row.user?.lastName,
+         row.created ? row.created.split('T')[0] : "N/A",
+         row.user.mobile ?? "N/A",
+         row.monthlyNetTotal ?? "N/A"
+       ]),
+     ];
+   } else {
+     csvData = [
+       columns,
+       ...data.map((row) => [
+         row.id,
+         row.created ? row.created.split('T')[0] : "N/A",
+         row.user?.firstName + ' ' + row.user?.lastName,
+         row.numberOfKg ?? "N/A",
+         row.bagWeight ?? "N/A",
+         row.netWeight ?? "N/A",
+         row.todayTeaPrice ?? "N/A",
+         row.totalPrice ?? "N/A"
+       ]),
+     ];
+   }
+
 
   const csv = Papa.unparse(csvData);
 

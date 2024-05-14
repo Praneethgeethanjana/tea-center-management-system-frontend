@@ -26,10 +26,11 @@ import {deleteTeaLeaves, getAllTeaLeavesRecords} from "@src/services/tea-leaves"
 import {deleteAdvance, getAllAdvanceDetails} from "@src/services/advance";
 import swal from "sweetalert";
 import Pagination from "@components/pagination";
+import {useSkin} from "@hooks/useSkin";
 
 
 const Advance = () => {
-  const navigate = useNavigate();
+  const {skin} = useSkin();
   const [loader, setLoader] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [advances, setAdvances] = useState([]);
@@ -184,7 +185,7 @@ const Advance = () => {
           <Col xs={12} className={"datatable-main-wrapper mt-2"}>
             <div>
               <DataTable
-                className="dataTable-custom light-table"
+                  className={`dataTable-custom ${skin === "dark" ? "dark-table" : "light-table"}`}
                 data={advances}
                 pointerOnHover
                 highlightOnHover

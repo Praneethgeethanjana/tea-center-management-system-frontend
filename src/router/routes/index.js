@@ -16,7 +16,7 @@ import {
   CHANGE_PASSWORD_ROUTE,
   DASHBOARD_ROUTE_PATH,
   FORGOT_PASSWORD_ROUTE,
-  REPORTS_ROUTE,
+  LOCATIONS_ROUTE,
   REGISTER_ROUTE,
   RESET_PASSWORD_ROUTE,
   ROUTE_LOGIN,
@@ -44,7 +44,7 @@ const DefaultRoute =   DASHBOARD_ROUTE_PATH ;
 
 const Home = lazy(() => import("../../views/home"));
 
-const Reports = lazy(() => import("../../views/report/index"));
+const Locations = lazy(() => import("../../views/locations/index"));
 const TeaLeaves = lazy(() => import("../../views/tea-leaves/index"));
 const Farmers = lazy(() => import("../../views/farmers/farmers"));
 const Stock = lazy(() => import("../../views/stock/index"));
@@ -79,8 +79,8 @@ const Routes = [
     element: <MedicalTests />,
   },
   {
-    path: REPORTS_ROUTE,
-    element: <Reports/>,
+    path: LOCATIONS_ROUTE,
+    element: <Locations/>,
   },
   {
     path: TEA_LEAVES_ROUTE,

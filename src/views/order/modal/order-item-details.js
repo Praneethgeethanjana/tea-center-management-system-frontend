@@ -4,7 +4,9 @@ import { Dropdown } from "semantic-ui-react";
 import { notifyMessage } from "@src/utility/commun-func";
 import Loader from "@components/spinner/Loader";
 import DataTable from "react-data-table-component";
+import {useSkin} from "@hooks/useSkin";
 const OrderItemDetails = ({ details, closeModal , totalAmount}) => {
+    const {skin} = useSkin();
     const [loading, setLoading] = useState(false);
 
     return (
@@ -14,7 +16,7 @@ const OrderItemDetails = ({ details, closeModal , totalAmount}) => {
                     <div className="w-100">
                         <div className="w-100">
                             <DataTable
-                                className="dataTable-custom light-table routeDetailsTable"
+                                className={`dataTable-custom routeDetailsTable ${skin === "dark" ? "dark-table" : "light-table"}`}
                                 data={details}
                                 pointerOnHover
                                 highlightOnHover

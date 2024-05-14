@@ -19,16 +19,17 @@ import Loader from "@components/spinner/Loader";
 import moment from "moment/moment";
 import { Checkbox, Dropdown, Form } from "semantic-ui-react";
 import Flatpickr from "react-flatpickr";
-import {Box, Edit, Eye, File, Plus, Trash2} from "react-feather";
+import {Box, Download, Edit, Eye, File, Plus, Trash2} from "react-feather";
 import { useNavigate } from "react-router-dom";
 import AddLeaves from "@src/views/tea-leaves/modal/add-leaves";
 import {deleteTeaLeaves, getAllTeaLeavesRecords} from "@src/services/tea-leaves";
 import Pagination from "@components/pagination";
 import swal from "sweetalert";
+import {useSkin} from "@hooks/useSkin";
 
 
 const TeaLeavesForAdmin = () => {
-  const navigate = useNavigate();
+  const {skin} = useSkin();
   const [loader, setLoader] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [leaves, setLeaves] = useState([]);
@@ -107,6 +108,22 @@ const TeaLeavesForAdmin = () => {
           notifyMessage(res.message,0);
         }
       })
+  }
+
+  const downloadReport = async () => {
+    const columnNames = [
+        "ID",
+        "DATE",
+        "FARMER NAME",
+        "TOTAL WEIGHT",
+        "BAG WEIGHT",
+        "NET WEIGHT",
+        "TEA PRICE FOR 1KG",
+        "TOTAL PRICE"
+    ]
+    const data = leaves
+    const name = "Tea Leaves" + `${selectedDates[0]} - ${selectedDates[1]} ${keyword}`
+    await downloadCSV(data,columnNames,name)
   }
 
 
@@ -188,6 +205,22 @@ const TeaLeavesForAdmin = () => {
                   />
                 </div>
               </Col>
+
+              <Col xs={12} sm={6} md={3}>
+                <div className="px-0 mt-2 mt-sm-0 px-sm-2">
+                  <p className="mb-0">Report</p>
+                  <button
+                      style={{height:'35px'}}
+                      onClick={downloadReport}
+                      type="button"
+                      className="btn btn-info"
+                  >
+                    <Download style={{marginRight:5}} size="15" />
+                   Download CSV
+                  </button>
+                </div>
+              </Col>
+
             </div>
           </Row>
         </Col>
@@ -198,7 +231,7 @@ const TeaLeavesForAdmin = () => {
           <Col xs={12} className={"datatable-main-wrapper mt-2"}>
             <div>
               <DataTable
-                className="dataTable-custom light-table"
+                  className={`dataTable-custom ${skin === "dark" ? "dark-table" : "light-table"}`}
                 data={leaves}
                 pointerOnHover
                 highlightOnHover

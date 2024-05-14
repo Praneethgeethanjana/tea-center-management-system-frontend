@@ -26,10 +26,11 @@ import {deleteStock, getAllStockDetails} from "@src/services/stock";
 import Pagination from "@components/pagination";
 import swal from "sweetalert";
 import {deleteAdvance} from "@src/services/advance";
+import {useSkin} from "@hooks/useSkin";
 
 
 const Stock = () => {
-  const navigate = useNavigate();
+  const {skin} = useSkin();
   const [loader, setLoader] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [appointments, setAppointments] = useState([]);
@@ -152,7 +153,7 @@ const Stock = () => {
           <Col xs={12} className={"datatable-main-wrapper mt-2"}>
             <div>
               <DataTable
-                className="dataTable-custom light-table"
+                  className={`dataTable-custom ${skin === "dark" ? "dark-table" : "light-table"}`}
                 data={stocks}
                 pointerOnHover
                 highlightOnHover

@@ -75,10 +75,10 @@ const UserDropdown = () => {
         {/*  <span className="align-middle">FAQ</span>*/}
         {/*</DropdownItem>*/}
 
-        {/*<DropdownItem tag={Link} to={CHANGE_PASSWORD_ROUTE}>*/}
-        {/*  <Edit size={14} className="me-75" />*/}
-        {/*  <span className="align-middle">Change Password</span>*/}
-        {/*</DropdownItem>*/}
+        <DropdownItem tag={Link} to={CHANGE_PASSWORD_ROUTE}>
+          <Edit size={14} className="me-75" />
+          <span className="align-middle">Change Password</span>
+        </DropdownItem>
 
         <DropdownItem tag={Link} to={ROUTE_LOGIN}>
           <Power size={14} className="me-75" />

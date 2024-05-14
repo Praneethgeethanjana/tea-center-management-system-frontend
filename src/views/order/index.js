@@ -29,10 +29,11 @@ import Pagination from "@components/pagination";
 import CreateOrder from "@src/views/order/modal/create-order";
 import {deleteOrder, getAllOrders} from "@src/services/order";
 import OrderItemDetails from "@src/views/order/modal/order-item-details";
+import {useSkin} from "@hooks/useSkin";
 
 
 const Order = () => {
-    const navigate = useNavigate();
+    const {skin} = useSkin();
     const [loader, setLoader] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [orders, setOrders] = useState([]);
@@ -186,7 +187,7 @@ const Order = () => {
                     <Col xs={12} className={"datatable-main-wrapper mt-2"}>
                         <div>
                             <DataTable
-                                className="dataTable-custom light-table"
+                                className={`dataTable-custom ${skin === "dark" ? "dark-table" : "light-table"}`}
                                 data={orders}
                                 pointerOnHover
                                 highlightOnHover

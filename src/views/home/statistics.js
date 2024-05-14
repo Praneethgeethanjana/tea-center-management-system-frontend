@@ -13,12 +13,15 @@ import {Database, DollarSign, Feather, Inbox, Square, User, UserCheck, UserPlus,
 // ** Styles
 import "@styles/react/apps/app-users.scss";
 import {getStatistics, getVariables} from "@src/services/statistics";
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import CreateAdvance from "@src/views/advance/modal/create-advance";
 import ChangePrices from "@src/views/home/modal/change-prices";
+import {ThemeColors} from "@src/utility/context/ThemeColors";
+import OrdersBarChart from "@src/views/ui-elements/cards/statistics/OrdersBarChart";
+import Loader from "@components/spinner/Loader";
 
 const Statistics = () => {
-
+  const { colors } = useContext(ThemeColors)
   const [farmerCount,setFarmerCount] = useState(null);
   const [fertilizerKg,setFertilizerKg] = useState(null);
   const [previousMonthWithdrawal,setPreviousMonthWithdrawal] = useState(null);
@@ -29,8 +32,10 @@ const Statistics = () => {
   const [teaFactoryPrice,setTeaFactoryPrice] = useState(null);
   const [teaCenterCharge,setTeaCenterCharge] = useState(null);
   const [isOpen,setIsOpen] = useState(false);
+  const [loader,setLoader] = useState(false);
 
   useEffect(() => {
+    setLoader(true)
     getVariablesHandler();
     getStatisticsHandler();
   },[]);
@@ -44,8 +49,7 @@ const Statistics = () => {
         setTotalWithdrawal(res.body?.totalWithdrawal);
         setThisMonthTeaKg(res.body?.thisMonthTeaKg)
       }
-    });
-
+    }).finally(()=> {setLoader(false)});
   }
 
   const getVariablesHandler = () => {
@@ -86,68 +90,73 @@ const Statistics = () => {
         </Col>
 
       </Row>
-      <Row className="mt-3">
-        {/*<Col lg="6" sm="6">*/}
-        {/*  <StatsHorizontal*/}
-        {/*      color="warning"*/}
-        {/*      statTitle="Today Leaves Price for 1Kg"*/}
-        {/*      icon={<UserX size={20} />}*/}
-        {/*      renderStats={<h3 className="fw-bolder mb-75">Rs {todayTeaPrice ?? 0}</h3>}*/}
-        {/*  />*/}
+      {loader ? <Loader/> :
+          <Row className="mt-3">
+            {/*<Col lg="6" sm="6">*/}
+            {/*  <StatsHorizontal*/}
+            {/*      color="warning"*/}
+            {/*      statTitle="Today Leaves Price for 1Kg"*/}
+            {/*      icon={<UserX size={20} />}*/}
+            {/*      renderStats={<h3 className="fw-bolder mb-75">Rs {todayTeaPrice ?? 0}</h3>}*/}
+            {/*  />*/}
 
-        {/*</Col>*/}
-        <Col lg="3" sm="6">
-          <StatsHorizontal
-            color="primary"
-            statTitle="Farmers"
-            icon={<User size={20} />}
-            renderStats={<h3 className="fw-bolder mb-75">{farmerCount ?? 0}</h3>}
-          />
-        </Col>
-        <Col lg="3" sm="6">
-          <StatsHorizontal
-              color="primary"
-              statTitle="This month all tea leaves"
-              icon={<Feather size={20} />}
-              renderStats={<h3 className="fw-bolder mb-75">{thisMonthTeaKg ?? 0} Kg</h3>}
-          />
-        </Col>
-        <Col lg="3" sm="6">
-          <StatsHorizontal
-            color="primary"
-            statTitle="Tea"
-            icon={<Square size={20} />}
-            renderStats={<h3 className="fw-bolder mb-75">{teaKg ?? 0} Kg</h3>}
-          />
-        </Col>
-        <Col lg="3" sm="6">
-          <StatsHorizontal
-            color="warning"
-            statTitle="Fertilizers"
-            icon={<Inbox size={20} />}
-            renderStats={<h3 className="fw-bolder mb-75">{fertilizerKg ?? 0} Kg</h3>}
-          />
-        </Col>
+            {/*</Col>*/}
+            <Col lg="3" sm="6">
+              <StatsHorizontal
+                  color="primary"
+                  statTitle="Farmers"
+                  icon={<User size={20} />}
+                  renderStats={<h3 className="fw-bolder mb-75">{farmerCount ?? 0}</h3>}
+              />
+            </Col>
+            <Col lg="3" sm="6">
+              <StatsHorizontal
+                  color="primary"
+                  statTitle="This month all tea leaves"
+                  icon={<Feather size={20} />}
+                  renderStats={<h3 className="fw-bolder mb-75">{thisMonthTeaKg ?? 0} Kg</h3>}
+              />
+            </Col>
+            <Col lg="3" sm="6">
+              <StatsHorizontal
+                  color="primary"
+                  statTitle="Tea"
+                  icon={<Square size={20} />}
+                  renderStats={<h3 className="fw-bolder mb-75">{teaKg ?? 0} Kg</h3>}
+              />
+            </Col>
+            <Col lg="3" sm="6">
+              <StatsHorizontal
+                  color="warning"
+                  statTitle="Fertilizers"
+                  icon={<Inbox size={20} />}
+                  renderStats={<h3 className="fw-bolder mb-75">{fertilizerKg ?? 0} Kg</h3>}
+              />
+            </Col>
 
-        <Col lg="3" sm="6">
-          <StatsHorizontal
-              color="danger"
-              statTitle="Prev.Month Withdrawal"
-              icon={<DollarSign size={20} />}
-              renderStats={<h3 className="fw-bolder mb-75">Rs {previousMonthWithdrawal ?? 0}</h3>}
-          />
-        </Col>
+            <Col lg="3" sm="6">
+              <StatsHorizontal
+                  color="danger"
+                  statTitle="Prev.Month Withdrawal"
+                  icon={<DollarSign size={20} />}
+                  renderStats={<h3 className="fw-bolder mb-75">Rs {previousMonthWithdrawal ?? 0}</h3>}
+              />
+            </Col>
 
-        <Col lg="3" sm="6">
-          <StatsHorizontal
-              color="info"
-              statTitle="Total Withdrawal"
-              icon={<Database size={20} />}
-              renderStats={<h3 className="fw-bolder mb-75">Rs {totalWithdrawal ?? 0}</h3>}
-          />
-        </Col>
+            <Col lg="3" sm="6">
+              <StatsHorizontal
+                  color="info"
+                  statTitle="Total Withdrawal"
+                  icon={<Database size={20} />}
+                  renderStats={<h3 className="fw-bolder mb-75">Rs {totalWithdrawal ?? 0}</h3>}
+              />
+            </Col>
 
-      </Row>
+            <Col lg='12' md='12' xs='12'>
+              <OrdersBarChart thisMonthTeaKg={thisMonthTeaKg} color={colors.primary.main} />
+            </Col>
+
+          </Row>}
 
       <Modal
           size={'md'}

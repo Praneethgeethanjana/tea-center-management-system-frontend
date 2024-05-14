@@ -81,7 +81,7 @@ const NotificationDropdown = () => {
     {
       avatarIcon: <Check size={14} />,
       color: "light-success",
-      subtitle: "Last month sales report generated",
+      subtitle: "Last month sales locations generated",
       title: (
         <p className="media-heading">
           <span className="fw-bolder">Sales report</span>&nbsp;generated

@@ -28,6 +28,7 @@ import Pagination from "@components/pagination";
 import TeaLeavesRecords from "@src/views/payments/modal/tea-leaves-records";
 import AdvanceRecords from "@src/views/payments/modal/advance-details";
 import MonthPicker from "@components/month-picker";
+import {useSkin} from "@hooks/useSkin";
 
 const  TEST_ARRAY =  [
   {
@@ -126,7 +127,7 @@ const  TEST_ARRAY =  [
   }
 ]
 const Payments = () => {
-  const navigate = useNavigate();
+  const {skin} = useSkin();
   const [loader, setLoader] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [payments, setPayments] = useState([]);
@@ -221,7 +222,7 @@ const Payments = () => {
           <Col xs={12} className={"datatable-main-wrapper mt-2"}>
             <div>
               <DataTable
-                className="dataTable-custom light-table"
+                  className={`dataTable-custom ${skin === "dark" ? "dark-table" : "light-table"}`}
                 data={payments}
                 pointerOnHover
                 highlightOnHover

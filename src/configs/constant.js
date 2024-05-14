@@ -30,6 +30,6 @@ export const PAYMENTS_ROUTE = BASE_ROUTE_PATH + "payments";
 export const PAYMENT_HISTORY_ROUTE = BASE_ROUTE_PATH + "payment-history";
 export const ORDERS_ROUTE = BASE_ROUTE_PATH + "orders";
 export const FARMERS_ROUTE = BASE_ROUTE_PATH + "farmers";
-export const REPORTS_ROUTE = BASE_ROUTE_PATH + "reports";
+export const LOCATIONS_ROUTE = BASE_ROUTE_PATH + "locations";
 export const CHANGE_PASSWORD_ROUTE = BASE_ROUTE_PATH + "change-password";
 export const SOMETHING_WENT_WRONG_MSG = "Something went wrong";

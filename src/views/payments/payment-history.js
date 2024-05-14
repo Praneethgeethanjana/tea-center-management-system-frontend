@@ -19,12 +19,13 @@ import Loader from "@components/spinner/Loader";
 import moment from "moment/moment";
 import { Checkbox, Dropdown, Form } from "semantic-ui-react";
 import Flatpickr from "react-flatpickr";
-import { Box, Eye, File, Plus } from "react-feather";
+import {Box, Download, Eye, File, Plus} from "react-feather";
 import { useNavigate } from "react-router-dom";
 import MakePayment from "@src/views/payments/modal/make-payment";
 import {getPaymentHistory, getPendingPayments} from "@src/services/payments";
 import Pagination from "@components/pagination";
 import MonthPicker from "@components/month-picker";
+import {useSkin} from "@hooks/useSkin";
 
 const  TEST_ARRAY =  [
     {
@@ -123,7 +124,7 @@ const  TEST_ARRAY =  [
     }
 ]
 const PaymentHistory = () => {
-    const navigate = useNavigate();
+    const {skin} = useSkin();
     const [loader, setLoader] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [payments, setPayments] = useState([]);
@@ -162,9 +163,18 @@ const PaymentHistory = () => {
 
     }
 
-    const statusChangeHandler = (id,action) => {
-        errorSweetAlert("Are you sure?","",action === "ACTIVE" ? "Accept" : action === "COMPLETED" ? "Yes, Complete" : "Yes,Reject",()=> {
-        },true)
+    const downloadReport = async () => {
+        const columnNames = [
+            "ID",
+            "FARMER NAME",
+            "DATE",
+            "MOBILE",
+            "MONTHLY NET TOTAL",
+        ]
+        const inputDate =  new Date(date)
+        const convertDate = moment(inputDate).format('YYYY-MM')
+        const name = "Payment History" + `- ${convertDate} ${keyword}`
+        await downloadCSV(payments,columnNames,name,true)
     }
 
 
@@ -204,6 +214,22 @@ const PaymentHistory = () => {
                                 </div>
                             </Col>
 
+
+                            <Col xs={12} sm={6} md={3}>
+                                <div className="px-0 mt-2 mt-sm-0 px-sm-2">
+                                    <p className="mb-0">Report</p>
+                                    <button
+                                        style={{height:'35px'}}
+                                        onClick={downloadReport}
+                                        type="button"
+                                        className="btn btn-info"
+                                    >
+                                        <Download style={{marginRight:5}} size="15" />
+                                        Download CSV
+                                    </button>
+                                </div>
+                            </Col>
+
                         </div>
                     </Row>
                 </Col>
@@ -214,7 +240,7 @@ const PaymentHistory = () => {
                     <Col xs={12} className={"datatable-main-wrapper mt-2"}>
                         <div>
                             <DataTable
-                                className="dataTable-custom light-table"
+                                className={`dataTable-custom ${skin === "dark" ? "dark-table" : "light-table"}`}
                                 data={payments}
                                 pointerOnHover
                                 highlightOnHover

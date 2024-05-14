@@ -22,6 +22,9 @@
 
 .dataTable-custom {
   background: white;
+  border-radius: 8px!important;
+  //box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   .rdt_TableHeadRow {
     background: #F3F2F7;
   }
@@ -326,9 +329,6 @@ table {
 }
 
 .light-table{
-  border-radius: 8px!important;
-  //box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
-  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   .rdt_TableHeadRow{
     //background: rgba(54, 93, 232, 0.4) !important;
     background-image: linear-gradient(#05930d, rgb(49, 197, 6,0.8));
@@ -337,8 +337,25 @@ table {
   }
   .rdt_TableRow{
     :hover{
-
     }
+  }
+
+}
+
+.dark-table{
+  background-color: #3b4253!important;
+  .rdt_TableHeadRow{
+    //background: rgba(54, 93, 232, 0.4) !important;
+    background-image: linear-gradient(#05930d, rgb(49, 197, 6,0.8));
+    color: white!important;
+  }
+  .rdt_TableRow{
+    background-color: #3b4253;
+    :hover{
+    }
+  }
+  .rdt_TableCell{
+    color: white;
   }
 }
 
@@ -569,4 +586,10 @@ table {
   border: 1px solid #a1a1a1;
   border-radius: 4px;
   height: 35px;
+}
+
+.react-datepicker__input-container{
+  input{
+    height: 35px!important;
+  }
 }

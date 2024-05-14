@@ -28,14 +28,6 @@ export async function getAllTeaLeavesRecords(keyword,page,startDate,endDate) {
   const apiObject = {};
   apiObject.method = "GET";
   apiObject.authentication = true;
-  apiObject.endpoint = `admin/farmer-stocks?keyword=${keyword}&page=${page}&size=10&fromDate=${startDate}&toDate=${endDate}`;
-  return await ApiService.callApi(apiObject);
-}
-
-export async function getAllTeaLeavesRecordsForReport(keyword,startDate,endDate) {
-  const apiObject = {};
-  apiObject.method = "GET";
-  apiObject.authentication = true;
-  apiObject.endpoint = `admin/farmer-stocks?keyword=${keyword}&page=0&size=1000&fromDate=${startDate}&toDate=${endDate}`;
+  apiObject.endpoint = `admin/farmer-stocks?keyword=${keyword}&page=${page}&size=1000&fromDate=${startDate}&toDate=${endDate}`;
   return await ApiService.callApi(apiObject);
 }

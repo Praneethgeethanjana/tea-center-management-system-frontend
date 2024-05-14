@@ -5,7 +5,7 @@ export async function saveMonthlyPayment(obj) {
     const apiObject = {};
     apiObject.method = "POST";
     apiObject.authentication = true;
-    apiObject.endpoint = "admin/report";
+    apiObject.endpoint = "admin/locations";
     apiObject.body = obj;
     return await ApiService.callApi(apiObject);
 }

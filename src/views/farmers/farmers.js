@@ -25,10 +25,12 @@ import { useNavigate } from "react-router-dom";
 import CreateFarmer from "@src/views/farmers/modal/create-farmer";
 import { getFarmers } from "@src/services/farmers";
 import Pagination from "@components/pagination";
+import {useSkin} from "@hooks/useSkin";
 
 
 const Farmers = () => {
   const navigate = useNavigate();
+  const {skin} = useSkin();
   const [loader, setLoader] = useState(false);
   const [farmers, setFarmers] = useState([]);
   const [selectedFarmer, setSelectedFarmer] = useState(null);
@@ -155,7 +157,7 @@ const Farmers = () => {
           <Col xs={12} className={"datatable-main-wrapper mt-2"}>
             <div>
               <DataTable
-                className="dataTable-custom light-table"
+                className={`dataTable-custom ${skin === "dark" ? "dark-table" : "light-table"}`}
                 data={farmers}
                 pointerOnHover
                 highlightOnHover

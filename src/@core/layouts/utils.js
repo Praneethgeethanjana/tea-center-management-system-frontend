@@ -1,4 +1,4 @@
-/* eslint-disable implicit-arrow-linebreak */
+/ eslint-disable implicit-arrow-linebreak /
 // ** React Imports
 import { useContext } from "react";
 import { AbilityContext } from "@src/utility/context/Can";
@@ -28,11 +28,11 @@ export const resolveHorizontalNavMenuItemComponent = (item) => {
  */
 export const isNavLinkActive = (link, currentURL, routerProps) => {
   return (
-    currentURL === link ||
-    (routerProps &&
-      routerProps.meta &&
-      routerProps.meta.navLink &&
-      routerProps.meta.navLink === link)
+      currentURL === link ||
+      (routerProps &&
+          routerProps.meta &&
+          routerProps.meta.navLink &&
+          routerProps.meta.navLink === link)
   );
   // return currentURL === link
 };
@@ -60,10 +60,10 @@ export const hasActiveChild = (item, currentUrl) => {
 
     // Check if the child has a link and is active
     if (
-      child &&
-      child.navLink &&
-      currentUrl &&
-      (child.navLink === currentUrl || currentUrl.includes(child.navLink))
+        child &&
+        child.navLink &&
+        currentUrl &&
+        (child.navLink === currentUrl || currentUrl.includes(child.navLink))
     ) {
       return true;
     }
@@ -96,7 +96,7 @@ const checkForVisibleChild = (arr, ability) => {
     if (i.children) {
       return checkForVisibleChild(i.children, ability);
     } else {
-      return ability.can(i.action, i.resource);
+      return true
     }
   });
 };
@@ -105,7 +105,7 @@ export const canViewMenuGroup = (item) => {
   const ability = useContext(AbilityContext);
   // ! This same logic is used in canViewHorizontalNavMenuGroup and canViewHorizontalNavMenuHeaderGroup. So make sure to update logic in them as well
   const hasAnyVisibleChild =
-    item.children && checkForVisibleChild(item.children, ability);
+      item.children && checkForVisibleChild(item.children, ability);
 
   // ** If resource and action is defined in item => Return based on children visibility (Hide group if no child is visible)
   // ** Else check for ability using provided resource and action along with checking if has any visible child

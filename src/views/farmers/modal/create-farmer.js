@@ -162,7 +162,7 @@ const CreateFarmer = ({ farmer, closeModal, updateHandler }) => {
 
             <Col md={4}>
               <div className={"text-wrapper tile-wrapper"}>
-                <Label className={"font-small-4"}>NIC</Label>
+                <Label className={"required font-small-4"}>NIC</Label>
                 <Input
                   name="nic"
                   value={data?.nic}

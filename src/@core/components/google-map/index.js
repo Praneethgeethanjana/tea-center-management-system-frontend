@@ -14,14 +14,14 @@ function MapComponent({ data, setData, farmer }) {
   };
 
   const center = {
-    lat: 52.62746051737441,
-    lng: -1.649065424693691,
+    lat: 6.053519,
+    lng: 80.220978,
   };
 
   const [map, setMap] = React.useState(null);
   const [selectedLocation, setSelectedLocation] = React.useState({
-    lat: 52.62746051737441,
-    lng: -1.649065424693691,
+    lat: 6.053519,
+    lng: 80.220978,
   });
 
   useEffect(() => {

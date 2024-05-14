@@ -6,7 +6,7 @@ import {
   Feather,
   Map,
   MessageSquare,
-  Users, Book, CheckSquare, FolderPlus, Bookmark, DollarSign, Archive, File
+  Users, Book, CheckSquare, FolderPlus, Bookmark, DollarSign, Archive, File, Disc, MapPin
 } from "react-feather";
 import {
   USER_ROLE,
@@ -19,7 +19,7 @@ import {
   ADVANCE_ROUTE,
   PAYMENTS_ROUTE,
   ORDERS_ROUTE,
-  PAYMENT_HISTORY_ROUTE, REPORTS_ROUTE
+  PAYMENT_HISTORY_ROUTE, LOCATIONS_ROUTE
 } from "../../configs/constant";
 
 
@@ -36,7 +36,7 @@ import {
     title: "Tea Leaves",
     icon: <Feather size={20} />,
     navLink: TEA_LEAVES_ROUTE,
-    roles:[ROLE_FARMER,ROLE_ADMIN]
+    roles:[ROLE_FARMER,ROLE_ADMIN],
   },
    {
      id: "stock",
@@ -70,21 +70,31 @@ import {
      id: "payments",
      title: "Payments",
      icon: <DollarSign size={20} />,
-     navLink: PAYMENTS_ROUTE,
-     roles:[ROLE_ADMIN,ROLE_FARMER]
+     // navLink: PAYMENTS_ROUTE,
+     roles:[ROLE_ADMIN,ROLE_FARMER],
+     children:[
+       {
+         id: "pending-payments",
+         title: "Pending Payment",
+         icon: <Disc size={20} />,
+         navLink: PAYMENTS_ROUTE,
+         roles:[ROLE_ADMIN,ROLE_FARMER]
+       },
+       {
+         id: "payment-history",
+         title: "Payment History",
+         icon: <Disc size={20} />,
+         navLink: PAYMENT_HISTORY_ROUTE,
+         roles:[ROLE_ADMIN,ROLE_FARMER]
+       },
+     ]
    },
+
    {
-     id: "payment-history",
-     title: "Payment History",
-     icon: <DollarSign size={20} />,
-     navLink: PAYMENT_HISTORY_ROUTE,
-     roles:[ROLE_ADMIN,ROLE_FARMER]
-   },
-   {
-     id: "download-reports",
-     title: "Download Reports",
-     icon: <File size={20} />,
-     navLink: REPORTS_ROUTE,
+     id: "locations",
+     title: "Locations",
+     icon: <MapPin size={20} />,
+     navLink: LOCATIONS_ROUTE,
      roles:[ROLE_ADMIN,ROLE_FARMER]
    },
 ];

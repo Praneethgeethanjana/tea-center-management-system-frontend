@@ -300,16 +300,16 @@ const MakePayment = ({ details, closeModal, updateHandler ,history}) => {
           </Row>
 
           <div className="d-flex justify-content-end">
-            {/*{!history && <button*/}
-            {/*    style={{marginRight:10}}*/}
-            {/*    disabled={apiLoader}*/}
-            {/*    className="btn btn-info mt-3"*/}
-            {/*    onClick={()=> {*/}
-            {/*      history ? closeModal() : handlePayment()*/}
-            {/*    }}*/}
-            {/*>*/}
-            {/*  Pay by PayHere*/}
-            {/*</button> }*/}
+            {!history && <button
+                style={{marginRight:10}}
+                disabled={apiLoader}
+                className="btn btn-info mt-3"
+                onClick={()=> {
+                  history ? closeModal() : handlePayment()
+                }}
+            >
+              Pay by PayHere
+            </button> }
 
             <button
               disabled={apiLoader}

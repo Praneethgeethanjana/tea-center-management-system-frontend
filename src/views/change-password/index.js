@@ -50,13 +50,13 @@ const ChangePassword = () => {
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;"),
     };
-    changeAdminPassword(obj).then((res) => {
+    await changeAdminPassword(obj).then((res) => {
       if (res.success) {
         formRef.current.reset();
         if (res.message) notifyMessage(res.message, 1);
       } else {
-        if (res.errorContent) {
-          notifyMessage(res.errorContent, 0);
+        if (res.message) {
+          notifyMessage(res.message, 0);
         } else {
           notifyMessage(SOMETHING_WENT_WRONG_MSG, 0);
         }
