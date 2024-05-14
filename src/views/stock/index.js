@@ -120,7 +120,7 @@ const Stock = () => {
               </Col>
               <Col xs={12} sm={6} md={3}>
                 <div className="px-0 px-sm-2">
-                  <p className="mb-0">Status</p>
+                  <p className="mb-0">Type</p>
                   <Dropdown
                     disabled={false}
                     placeholder=""

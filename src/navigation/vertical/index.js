@@ -31,6 +31,13 @@ import {
      navLink: DASHBOARD_ROUTE_PATH,
      roles:[ROLE_FARMER,ROLE_ADMIN]
    },
+   {
+     id: "farmers",
+     title: "Farmers",
+     icon: <Users size={20} />,
+     navLink: FARMERS_ROUTE,
+     roles:[ROLE_ADMIN,ROLE_FARMER]
+   },
   {
     id: "tea-leaves",
     title: "Tea Leaves",
@@ -45,13 +52,7 @@ import {
      navLink: STOCK_ROUTE,
      roles:[ROLE_FARMER,ROLE_ADMIN]
    },
-   {
-     id: "farmers",
-     title: "Farmers",
-     icon: <Users size={20} />,
-     navLink: FARMERS_ROUTE,
-     roles:[ROLE_ADMIN,ROLE_FARMER]
-   },
+
    {
      id: "orders",
      title: "Orders",
